@@ -3,6 +3,10 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // حزمة مستقلة (.next/standalone) تحتوي كل شيء بما فيه node_modules المطلوبة فقط —
+  // مثالية لاستضافة cPanel حيث لا يمكن تنفيذ npm install كامل على الخادم.
+  // تُفعَّل عبر: npm run build:cpanel
+  ...(process.env.BUILD_STANDALONE === '1' ? { output: 'standalone' as const } : {}),
   serverExternalPackages: ['bwip-js', 'exceljs', 'bcryptjs'],
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts', 'date-fns'],

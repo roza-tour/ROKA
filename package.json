@@ -14,6 +14,12 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:demo": "tsx prisma/seed-demo.ts",
+    "db:deploy": "prisma migrate deploy",
+    "db:sqlite": "node scripts/switch-db.mjs sqlite",
+    "db:mysql": "node scripts/switch-db.mjs mysql",
+    "db:postgres": "node scripts/switch-db.mjs postgresql",
+    "build:cpanel": "node scripts/build-standalone.mjs",
     "setup": "prisma generate && prisma db push && npm run db:seed"
   },
   "prisma": {

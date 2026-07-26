@@ -16,7 +16,7 @@
 - [الأدوار والصلاحيات](#الأدوار-والصلاحيات)
 - [بنية المشروع](#بنية-المشروع)
 - [قواعد العمل المهمّة](#قواعد-العمل-المهمّة)
-- [الانتقال إلى PostgreSQL](#الانتقال-إلى-postgresql)
+- [قاعدة البيانات والنشر](#قاعدة-البيانات-والنشر)
 - [الإشعارات](#الإشعارات)
 - [النسخ الاحتياطي](#النسخ-الاحتياطي)
 - [الأمان](#الأمان)
@@ -166,6 +166,12 @@ npx tsx prisma/seed-demo.ts
 | `npm run db:migrate` | إنشاء ملف ترحيل (للإنتاج) |
 | `npm run db:studio` | واجهة رسومية لقاعدة البيانات |
 | `npm run db:seed` | تعبئة البيانات الأساسية |
+| `npm run db:seed:demo` | تعبئة بيانات تجريبية |
+| `npm run db:deploy` | تطبيق الترحيلات (إنتاج) |
+| `npm run db:sqlite` | ضبط المخطط على SQLite |
+| `npm run db:mysql` | ضبط المخطط على MySQL (cPanel) |
+| `npm run db:postgres` | ضبط المخطط على PostgreSQL |
+| `npm run build:cpanel` | حزمة standalone جاهزة لـ cPanel |
 
 ---
 
@@ -297,27 +303,57 @@ src/
 
 ---
 
-## الانتقال إلى PostgreSQL
+## قاعدة البيانات والنشر
 
-المخطط مصمّم ليعمل على أي قاعدة دون تعديل (لا يستخدم `enum` ولا `Json` على مستوى
-قاعدة البيانات):
+المخطط مصمّم ليعمل على **SQLite و MySQL/MariaDB و PostgreSQL** بنفس الكود — لا
+يستخدم `enum` ولا `Json` على مستوى قاعدة البيانات، والقيم المسموحة معرّفة كأنواع
+TypeScript في `src/lib/constants.ts`.
 
-```prisma
-// prisma/schema.prisma
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-```
+### تبديل قاعدة البيانات
 
 ```bash
-DATABASE_URL="postgresql://user:pass@localhost:5432/roka"
-npm run db:migrate
-npm run db:seed
+npm run db:sqlite     # التطوير المحلي (الافتراضي)
+npm run db:mysql      # استضافة cPanel
+npm run db:postgres   # VPS / سحابة
 ```
 
-لدقة مالية أعلى في PostgreSQL، استبدل `Float` بـ `Decimal @db.Decimal(14,3)` في الحقول
-المالية قبل الترحيل.
+السكربت `scripts/switch-db.mjs` لا يبدّل `provider` فقط، بل يضيف أو يزيل
+`@db.Text` / `@db.LongText` لـ **56 حقلاً** طويلاً. هذه الخطوة إلزامية على
+MySQL لأن Prisma يحوّل `String` إلى `VARCHAR(191)` افتراضياً، وهو ما يكسر:
+
+| الحقل | المحتوى | النوع اللازم |
+|---|---|---|
+| `RepairOrder.customerSignature` / `employeeSignature` | توقيع رقمي base64 | `LONGTEXT` |
+| `AuditLog.before` / `after` | لقطة JSON قبل/بعد كل تعديل | `LONGTEXT` |
+| `RepairOrder.conditionReport` / `damageMarks` / `photos` / `accessories` | JSON تقرير الحالة | `TEXT` |
+| `Invoice.terms`، `Warranty.terms`، `NotificationTemplate.body`، الملاحظات… | نصوص طويلة | `TEXT` |
+
+بعد التبديل:
+
+```bash
+npx prisma generate
+npx prisma migrate deploy      # أو db push للتجربة
+```
+
+الأنواع الثلاثة مُتحقَّق منها بـ `prisma validate`، والعودة إلى SQLite تعيد
+المخطط إلى حالته الأصلية تماماً. لا يوجد فهرس على أي عمود `TEXT` فلا تصطدم
+بحد 3072 بايت في InnoDB.
+
+### النشر على cPanel
+
+```bash
+npm run db:mysql
+npm run build:cpanel     # ينتج .next/standalone جاهزاً للرفع
+```
+
+الدليل الكامل خطوة بخطوة (إنشاء قاعدة MySQL، `utf8mb4`، Setup Node.js App،
+`binaryTargets`، حدود الاتصالات، حلّ المشكلات الشائعة):
+**[docs/CPANEL.md](docs/CPANEL.md)**
+
+### دقة الأرقام المالية
+
+الحقول المالية بنوع `Float` — كافٍ لمبالغ المحل. لدقة محاسبية أعلى على
+PostgreSQL استبدلها بـ `Decimal @db.Decimal(14,3)` قبل أول ترحيل.
 
 ---
 
@@ -391,7 +427,7 @@ SMTP_PASSWORD="..."
 1. ولّد `AUTH_SECRET` و`ENCRYPTION_KEY` جديدين — **لا تستخدم قيم المثال أبداً**.
 2. غيّر كلمة مرور المدير.
 3. فعّل HTTPS (الكوكي يصبح `secure` تلقائياً في وضع الإنتاج).
-4. انتقل إلى PostgreSQL.
+4. انتقل إلى MySQL (`npm run db:mysql`) أو PostgreSQL (`npm run db:postgres`) — SQLite للتطوير فقط.
 5. اضبط `NEXT_PUBLIC_APP_URL` على العنوان الحقيقي حتى تعمل روابط التتبع.
 6. جدول نسخاً احتياطية دورية.
 

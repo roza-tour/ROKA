@@ -13,10 +13,20 @@
 
 generator client {
   provider = "prisma-client-js"
+
+  // "native" = محرّك يطابق النظام الذي يُنفَّذ عليه `prisma generate`.
+  // إذا كنت تبني المشروع على جهازك ثم ترفع مجلد .next إلى cPanel، أضف هدف
+  // خادم cPanel أيضاً وإلا فشل الاتصال بقاعدة البيانات على الخادم:
+  //   binaryTargets = ["native", "debian-openssl-3.0.x"]   ← Ubuntu/Debian
+  //   binaryTargets = ["native", "rhel-openssl-3.0.x"]     ← CloudLinux/AlmaLinux (الأشهر في cPanel)
+  // لمعرفة الهدف الصحيح نفّذ على الخادم:  node -e "console.log(process.report.getReport().header.glibcVersionRuntime)"
+  // أما إذا كنت تبني على الخادم نفسه عبر SSH فاترك "native" فقط.
+  binaryTargets = ["native"]
 }
 
 datasource db {
-  // للإنتاج غيّرها إلى "postgresql" وحدّث DATABASE_URL
+  // بدِّل المزوّد عبر:  npm run db:mysql | db:postgres | db:sqlite
+  // (السكربت يضيف/يزيل @db.Text تلقائياً للحقول الطويلة)
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
@@ -95,8 +105,8 @@ model User {
 
   sessions        Session[]
   auditLogs       AuditLog[]
-  repairsReceived RepairOrder[]        @relation("ReceivedBy")
-  repairsAssigned RepairOrder[]        @relation("Technician")
+  repairsReceived RepairOrder[]       @relation("ReceivedBy")
+  repairsAssigned RepairOrder[]       @relation("Technician")
   repairHistory   RepairStatusEvent[]
   invoices        Invoice[]
   payments        Payment[]
@@ -114,32 +124,32 @@ model User {
 }
 
 model Session {
-  id        String   @id @default(cuid())
-  jti       String   @unique
+  id        String    @id @default(cuid())
+  jti       String    @unique
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   ip        String?
   userAgent String?
   expiresAt DateTime
   revokedAt DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([userId])
   @@index([expiresAt])
 }
 
 model AuditLog {
-  id       String  @id @default(cuid())
-  userId   String?
-  user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-  userName String? // نسخة ثابتة من الاسم حتى لو حُذف المستخدم
-  action   String // CREATE | UPDATE | DELETE | LOGIN | LOGOUT | PRINT | EXPORT | ...
-  entity   String // Customer | RepairOrder | Invoice | ...
-  entityId String?
-  summary  String? // وصف مقروء للعملية
-  before   String? // JSON
-  after    String? // JSON
-  ip       String?
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userName  String? // نسخة ثابتة من الاسم حتى لو حُذف المستخدم
+  action    String // CREATE | UPDATE | DELETE | LOGIN | LOGOUT | PRINT | EXPORT | ...
+  entity    String // Customer | RepairOrder | Invoice | ...
+  entityId  String?
+  summary   String? // وصف مقروء للعملية
+  before    String? // JSON
+  after     String? // JSON
+  ip        String?
   userAgent String?
   createdAt DateTime @default(now())
 
@@ -181,15 +191,15 @@ model Customer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  devices      Device[]
-  repairOrders RepairOrder[]
-  invoices     Invoice[]
-  quotations   Quotation[]
-  payments     Payment[]
-  loyaltyMoves LoyaltyTransaction[]
-  warranties   Warranty[]
-  installments InstallmentPlan[]
-  appointments Appointment[]
+  devices       Device[]
+  repairOrders  RepairOrder[]
+  invoices      Invoice[]
+  quotations    Quotation[]
+  payments      Payment[]
+  loyaltyMoves  LoyaltyTransaction[]
+  warranties    Warranty[]
+  installments  InstallmentPlan[]
+  appointments  Appointment[]
   notifications NotificationLog[]
 
   @@index([phone])
@@ -279,22 +289,22 @@ model RepairOrder {
   customerSignature String? // data:image/png;base64
   employeeSignature String?
 
-  estimatedCost Float  @default(0)
-  finalCost     Float  @default(0)
-  partsCost     Float  @default(0)
-  laborCost     Float  @default(0)
-  depositAmount Float  @default(0)
+  estimatedCost Float @default(0)
+  finalCost     Float @default(0)
+  partsCost     Float @default(0)
+  laborCost     Float @default(0)
+  depositAmount Float @default(0)
 
-  receivedAt   DateTime  @default(now())
-  promisedAt   DateTime?
-  diagnosedAt  DateTime?
-  approvedAt   DateTime?
-  completedAt  DateTime?
-  deliveredAt  DateTime?
+  receivedAt  DateTime  @default(now())
+  promisedAt  DateTime?
+  diagnosedAt DateTime?
+  approvedAt  DateTime?
+  completedAt DateTime?
+  deliveredAt DateTime?
 
-  warrantyDays  Int       @default(0)
+  warrantyDays   Int       @default(0)
   warrantyEndsAt DateTime?
-  warrantyTerms String?
+  warrantyTerms  String?
 
   trackingToken String  @unique
   isArchived    Boolean @default(false)
@@ -327,11 +337,11 @@ model RepairItem {
   product   Product? @relation(fields: [productId], references: [id])
 
   name      String
-  quantity  Float  @default(1)
-  unitPrice Float  @default(0)
-  unitCost  Float  @default(0)
-  discount  Float  @default(0)
-  total     Float  @default(0)
+  quantity  Float   @default(1)
+  unitPrice Float   @default(0)
+  unitCost  Float   @default(0)
+  discount  Float   @default(0)
+  total     Float   @default(0)
   notes     String?
 
   createdAt DateTime @default(now())
@@ -374,8 +384,8 @@ model ServiceCategory {
 }
 
 model Service {
-  id     String @id @default(cuid())
-  code   String @unique
+  id     String  @id @default(cuid())
+  code   String  @unique
   name   String
   nameFr String?
   nameEn String?
@@ -410,7 +420,7 @@ model Service {
 // ---------------------------------------------------------------------
 
 model ProductCategory {
-  id        String  @id @default(cuid())
+  id        String            @id @default(cuid())
   name      String
   nameFr    String?
   nameEn    String?
@@ -418,8 +428,8 @@ model ProductCategory {
   parent    ProductCategory?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
   children  ProductCategory[] @relation("CategoryTree")
   icon      String?
-  sortOrder Int     @default(0)
-  isActive  Boolean @default(true)
+  sortOrder Int               @default(0)
+  isActive  Boolean           @default(true)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -434,20 +444,20 @@ model Product {
   nameFr  String?
   nameEn  String?
 
-  type        String // DEVICE | PART | ACCESSORY | CONSUMABLE
-  categoryId  String?
-  category    ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  brand       String?
-  model       String?
+  type           String // DEVICE | PART | ACCESSORY | CONSUMABLE
+  categoryId     String?
+  category       ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  brand          String?
+  model          String?
   compatibleWith String? // موديلات متوافقة (نص حر / JSON)
-  description String?
-  imageUrl    String?
-  unit        String  @default("PCS")
+  description    String?
+  imageUrl       String?
+  unit           String           @default("PCS")
 
-  costPrice     Float @default(0)
-  sellPrice     Float @default(0)
+  costPrice      Float @default(0)
+  sellPrice      Float @default(0)
   wholesalePrice Float @default(0)
-  taxRate       Float @default(0)
+  taxRate        Float @default(0)
 
   quantity    Float   @default(0) // إجمالي عبر كل الفروع
   minQuantity Float   @default(0)
@@ -500,14 +510,14 @@ model StockMovement {
   branchId  String?
   branch    Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
 
-  type       String // IN | OUT | ADJUST | RETURN_IN | RETURN_OUT | TRANSFER | DAMAGE
-  quantity   Float // موجب دائماً؛ الاتجاه محدد بـ type
-  balanceAfter Float @default(0)
-  unitCost   Float  @default(0)
-  reason     String?
-  refType    String? // Invoice | RepairOrder | PurchaseOrder | MANUAL
-  refId      String?
-  refNumber  String?
+  type         String // IN | OUT | ADJUST | RETURN_IN | RETURN_OUT | TRANSFER | DAMAGE
+  quantity     Float // موجب دائماً؛ الاتجاه محدد بـ type
+  balanceAfter Float   @default(0)
+  unitCost     Float   @default(0)
+  reason       String?
+  refType      String? // Invoice | RepairOrder | PurchaseOrder | MANUAL
+  refId        String?
+  refNumber    String?
 
   userId String?
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -521,18 +531,18 @@ model StockMovement {
 }
 
 model Supplier {
-  id      String  @id @default(cuid())
-  code    String  @unique
-  name    String
-  company String?
-  phone   String?
-  phone2  String?
-  email   String?
-  address String?
+  id        String  @id @default(cuid())
+  code      String  @unique
+  name      String
+  company   String?
+  phone     String?
+  phone2    String?
+  email     String?
+  address   String?
   taxNumber String?
-  notes   String?
-  balance Float   @default(0) // ما علينا للمورد
-  isActive Boolean @default(true)
+  notes     String?
+  balance   Float   @default(0) // ما علينا للمورد
+  isActive  Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -551,16 +561,16 @@ model PurchaseOrder {
   userId     String?
   user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  status      String @default("DRAFT") // DRAFT | ORDERED | RECEIVED | PARTIAL | CANCELLED
-  subtotal    Float  @default(0)
-  discount    Float  @default(0)
-  tax         Float  @default(0)
-  shipping    Float  @default(0)
-  total       Float  @default(0)
-  paidAmount  Float  @default(0)
-  notes       String?
-  orderedAt   DateTime @default(now())
-  receivedAt  DateTime?
+  status     String    @default("DRAFT") // DRAFT | ORDERED | RECEIVED | PARTIAL | CANCELLED
+  subtotal   Float     @default(0)
+  discount   Float     @default(0)
+  tax        Float     @default(0)
+  shipping   Float     @default(0)
+  total      Float     @default(0)
+  paidAmount Float     @default(0)
+  notes      String?
+  orderedAt  DateTime  @default(now())
+  receivedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -624,9 +634,9 @@ model Invoice {
   couponId String?
   coupon   Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
 
-  notes        String?
-  terms        String?
-  warrantyDays Int       @default(0)
+  notes          String?
+  terms          String?
+  warrantyDays   Int       @default(0)
   warrantyEndsAt DateTime?
 
   issuedAt DateTime  @default(now())
@@ -661,12 +671,12 @@ model InvoiceItem {
 
   name        String
   description String?
-  quantity    Float  @default(1)
-  unitPrice   Float  @default(0)
-  unitCost    Float  @default(0)
-  discount    Float  @default(0)
-  taxRate     Float  @default(0)
-  total       Float  @default(0)
+  quantity    Float   @default(1)
+  unitPrice   Float   @default(0)
+  unitCost    Float   @default(0)
+  discount    Float   @default(0)
+  taxRate     Float   @default(0)
+  total       Float   @default(0)
 
   @@index([invoiceId])
   @@index([productId])
@@ -674,7 +684,7 @@ model InvoiceItem {
 }
 
 model Payment {
-  id        String  @id @default(cuid())
+  id        String   @id @default(cuid())
   invoiceId String?
   invoice   Invoice? @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
@@ -685,7 +695,7 @@ model Payment {
   method    String // CASH | CARD | BANK_TRANSFER | WALLET | CREDIT | CHECK
   reference String?
   notes     String?
-  direction String @default("IN") // IN | OUT (استرجاع)
+  direction String  @default("IN") // IN | OUT (استرجاع)
 
   userId String?
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -702,18 +712,18 @@ model Payment {
 }
 
 model Coupon {
-  id          String   @id @default(cuid())
-  code        String   @unique
+  id          String    @id @default(cuid())
+  code        String    @unique
   description String?
-  type        String   @default("PERCENT") // PERCENT | FIXED
-  value       Float    @default(0)
-  minAmount   Float    @default(0)
-  maxDiscount Float    @default(0) // 0 = بلا حد
-  usageLimit  Int      @default(0) // 0 = بلا حد
-  usedCount   Int      @default(0)
-  startsAt    DateTime @default(now())
+  type        String    @default("PERCENT") // PERCENT | FIXED
+  value       Float     @default(0)
+  minAmount   Float     @default(0)
+  maxDiscount Float     @default(0) // 0 = بلا حد
+  usageLimit  Int       @default(0) // 0 = بلا حد
+  usedCount   Int       @default(0)
+  startsAt    DateTime  @default(now())
   endsAt      DateTime?
-  isActive    Boolean  @default(true)
+  isActive    Boolean   @default(true)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -775,11 +785,11 @@ model QuotationItem {
 
   name        String
   description String?
-  quantity    Float  @default(1)
-  unitPrice   Float  @default(0)
-  unitCost    Float  @default(0)
-  discount    Float  @default(0)
-  total       Float  @default(0)
+  quantity    Float   @default(1)
+  unitPrice   Float   @default(0)
+  unitCost    Float   @default(0)
+  discount    Float   @default(0)
+  total       Float   @default(0)
 
   @@index([quotationId])
 }
@@ -800,14 +810,14 @@ model Warranty {
   repairOrderId String?
   repairOrder   RepairOrder? @relation(fields: [repairOrderId], references: [id], onDelete: SetNull)
 
-  itemName   String
-  serial     String?
-  days       Int      @default(0)
-  startsAt   DateTime @default(now())
-  endsAt     DateTime
-  terms      String?
-  status     String   @default("ACTIVE") // ACTIVE | EXPIRED | CLAIMED | VOID
-  claimNotes String?
+  itemName       String
+  serial         String?
+  days           Int       @default(0)
+  startsAt       DateTime  @default(now())
+  endsAt         DateTime
+  terms          String?
+  status         String    @default("ACTIVE") // ACTIVE | EXPIRED | CLAIMED | VOID
+  claimNotes     String?
   reminderSentAt DateTime?
 
   createdAt DateTime @default(now())
@@ -830,10 +840,10 @@ model InstallmentPlan {
   invoiceId  String?
   invoice    Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
 
-  totalAmount Float  @default(0)
-  downPayment Float  @default(0)
-  months      Int    @default(1)
-  status      String @default("ACTIVE") // ACTIVE | COMPLETED | DEFAULTED | CANCELLED
+  totalAmount Float    @default(0)
+  downPayment Float    @default(0)
+  months      Int      @default(1)
+  status      String   @default("ACTIVE") // ACTIVE | COMPLETED | DEFAULTED | CANCELLED
   startDate   DateTime @default(now())
   notes       String?
 
@@ -855,7 +865,7 @@ model Installment {
   amount   Float
   dueDate  DateTime
   paidAt   DateTime?
-  status   String @default("PENDING") // PENDING | PAID | OVERDUE | WAIVED
+  status   String    @default("PENDING") // PENDING | PAID | OVERDUE | WAIVED
 
   payment Payment?
 
@@ -869,23 +879,23 @@ model Installment {
 // ---------------------------------------------------------------------
 
 model ExpenseCategory {
-  id        String  @id @default(cuid())
-  name      String  @unique
-  nameFr    String?
-  nameEn    String?
-  icon      String?
-  color     String?
+  id                 String  @id @default(cuid())
+  name               String  @unique
+  nameFr             String?
+  nameEn             String?
+  icon               String?
+  color              String?
   isRecurringDefault Boolean @default(false)
-  sortOrder Int     @default(0)
-  isActive  Boolean @default(true)
+  sortOrder          Int     @default(0)
+  isActive           Boolean @default(true)
 
   createdAt DateTime  @default(now())
   expenses  Expense[]
 }
 
 model Expense {
-  id         String          @id @default(cuid())
-  number     String          @unique
+  id         String           @id @default(cuid())
+  number     String           @unique
   categoryId String?
   category   ExpenseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
@@ -898,10 +908,10 @@ model Expense {
   receiptUrl    String?
   notes         String?
 
-  isRecurring Boolean   @default(false)
-  recurrence  String? // DAILY | WEEKLY | MONTHLY | QUARTERLY | YEARLY
-  nextDueDate DateTime?
-  reminderDays Int      @default(3)
+  isRecurring    Boolean   @default(false)
+  recurrence     String? // DAILY | WEEKLY | MONTHLY | QUARTERLY | YEARLY
+  nextDueDate    DateTime?
+  reminderDays   Int       @default(3)
   reminderSentAt DateTime?
 
   userId   String?
@@ -929,8 +939,8 @@ model Attendance {
   date     DateTime // منتصف ليل اليوم
   checkIn  DateTime?
   checkOut DateTime?
-  minutes  Int      @default(0)
-  status   String   @default("PRESENT") // PRESENT | ABSENT | LATE | LEAVE | HOLIDAY
+  minutes  Int       @default(0)
+  status   String    @default("PRESENT") // PRESENT | ABSENT | LATE | LEAVE | HOLIDAY
   notes    String?
 
   createdAt DateTime @default(now())
@@ -945,16 +955,16 @@ model Payroll {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  period     String // 2026-07
-  baseSalary Float  @default(0)
-  bonuses    Float  @default(0)
-  commissions Float @default(0)
-  deductions Float  @default(0)
-  advances   Float  @default(0)
-  netAmount  Float  @default(0)
-  status     String @default("PENDING") // PENDING | PAID
-  paidAt     DateTime?
-  notes      String?
+  period      String // 2026-07
+  baseSalary  Float     @default(0)
+  bonuses     Float     @default(0)
+  commissions Float     @default(0)
+  deductions  Float     @default(0)
+  advances    Float     @default(0)
+  netAmount   Float     @default(0)
+  status      String    @default("PENDING") // PENDING | PAID
+  paidAt      DateTime?
+  notes       String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -968,12 +978,12 @@ model Payroll {
 // ---------------------------------------------------------------------
 
 model NotificationTemplate {
-  id      String  @id @default(cuid())
-  key     String // repair.received | repair.ready | warranty.expiring ...
-  channel String // SMS | WHATSAPP | EMAIL
-  locale  String  @default("ar")
-  subject String?
-  body    String
+  id       String  @id @default(cuid())
+  key      String // repair.received | repair.ready | warranty.expiring ...
+  channel  String // SMS | WHATSAPP | EMAIL
+  locale   String  @default("ar")
+  subject  String?
+  body     String
   isActive Boolean @default(true)
 
   createdAt DateTime @default(now())
@@ -983,11 +993,11 @@ model NotificationTemplate {
 }
 
 model NotificationLog {
-  id      String @id @default(cuid())
-  channel String // SMS | WHATSAPP | EMAIL | INTERNAL
+  id        String  @id @default(cuid())
+  channel   String // SMS | WHATSAPP | EMAIL | INTERNAL
   toAddress String
-  subject String?
-  body    String
+  subject   String?
+  body      String
 
   customerId String?
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
@@ -996,11 +1006,11 @@ model NotificationLog {
   refType     String?
   refId       String?
 
-  status    String @default("PENDING") // PENDING | SENT | FAILED | SKIPPED
-  provider  String?
-  error     String?
-  attempts  Int    @default(0)
-  sentAt    DateTime?
+  status   String    @default("PENDING") // PENDING | SENT | FAILED | SKIPPED
+  provider String?
+  error    String?
+  attempts Int       @default(0)
+  sentAt   DateTime?
 
   createdAt DateTime @default(now())
 
@@ -1017,7 +1027,7 @@ model Appointment {
   id         String    @id @default(cuid())
   number     String    @unique
   customerId String?
-  customer   Customer?  @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   customerName  String
   customerPhone String
@@ -1061,9 +1071,9 @@ model BackupLog {
 // ---------------------------------------------------------------------
 
 model Counter {
-  id     String @id @default(cuid())
-  key    String @unique // RO-2026 | INV-2026 | QT-2026 ...
-  value  Int    @default(0)
+  id    String @id @default(cuid())
+  key   String @unique // RO-2026 | INV-2026 | QT-2026 ...
+  value Int    @default(0)
 
   updatedAt DateTime @updatedAt
 }
