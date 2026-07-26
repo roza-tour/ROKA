@@ -11,7 +11,7 @@ import {
   firstError,
   fieldErrors,
 } from '@/lib/validation';
-import { addDays, addMonths } from '@/lib/utils';
+import { nextDueFrom } from '@/lib/recurrence';
 import type { FormState } from './customers';
 import type { Recurrence } from '@/lib/constants';
 
@@ -24,23 +24,6 @@ function formToObject(formData: FormData): Record<string, unknown> {
   return obj;
 }
 
-/** حساب تاريخ الاستحقاق التالي لمصروف دوري */
-export function nextDueFrom(date: Date, recurrence: Recurrence): Date {
-  switch (recurrence) {
-    case 'DAILY':
-      return addDays(date, 1);
-    case 'WEEKLY':
-      return addDays(date, 7);
-    case 'MONTHLY':
-      return addMonths(date, 1);
-    case 'QUARTERLY':
-      return addMonths(date, 3);
-    case 'YEARLY':
-      return addMonths(date, 12);
-    default:
-      return addMonths(date, 1);
-  }
-}
 
 export async function createExpenseAction(
   _prev: FormState | null,
