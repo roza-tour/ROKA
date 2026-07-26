@@ -1,0 +1,247 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: 'Cairo', 'Segoe UI', 'Noto Sans Arabic', 'Noto Kufi Arabic', Tahoma,
+      -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+
+    --radius: 0.75rem;
+
+    /* الوضع الفاتح */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+    --primary-50: 214 100% 97%;
+    --primary-100: 214 95% 93%;
+    --primary-600: 221 83% 48%;
+    --primary-700: 224 76% 40%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 94%;
+    --accent-foreground: 222 47% 11%;
+
+    --success: 142 71% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 26 83% 14%;
+    --danger: 0 72% 51%;
+    --danger-foreground: 0 0% 100%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
+  }
+
+  .dark {
+    --background: 222 47% 8%;
+    --foreground: 210 40% 96%;
+    --card: 222 44% 11%;
+    --card-foreground: 210 40% 96%;
+    --popover: 222 44% 11%;
+    --popover-foreground: 210 40% 96%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 8%;
+    --primary-50: 222 47% 14%;
+    --primary-100: 222 45% 18%;
+    --primary-600: 217 91% 55%;
+    --primary-700: 217 85% 48%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 33% 20%;
+    --accent-foreground: 210 40% 96%;
+
+    --success: 142 69% 45%;
+    --success-foreground: 144 80% 8%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 26 83% 10%;
+    --danger: 0 72% 58%;
+    --danger-foreground: 0 0% 100%;
+    --info: 199 89% 55%;
+    --info-foreground: 199 90% 10%;
+
+    --border: 217 33% 20%;
+    --input: 217 33% 22%;
+    --ring: 217 91% 60%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+    font-feature-settings: 'kern', 'liga';
+    text-rendering: optimizeLegibility;
+  }
+
+  /* الأرقام دائماً بالاتجاه اللاتيني حتى في RTL */
+  [dir='rtl'] .numeric,
+  .numeric {
+    direction: ltr;
+    unicode-bidi: isolate;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* شريط تمرير أنيق */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-border;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/40;
+  }
+
+  /* حلقة التركيز الموحّدة */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* إخفاء أسهم حقول الأرقام */
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-lg border border-border bg-card text-card-foreground shadow-soft;
+  }
+
+  .input-base {
+    @apply h-10 w-full rounded-md border border-input bg-background px-3 text-sm
+           transition-colors placeholder:text-muted-foreground
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .label-base {
+    @apply mb-1.5 block text-sm font-medium text-foreground;
+  }
+
+  .table-base {
+    @apply w-full border-collapse text-sm;
+  }
+  .table-base thead th {
+    @apply border-b border-border bg-muted/50 px-3 py-2.5 text-start text-xs
+           font-semibold uppercase tracking-wide text-muted-foreground;
+  }
+  .table-base tbody td {
+    @apply border-b border-border/60 px-3 py-2.5 align-middle;
+  }
+  .table-base tbody tr:hover {
+    @apply bg-muted/40;
+  }
+
+  /* هيكل تحميل متحرك */
+  .skeleton {
+    @apply relative overflow-hidden rounded-md bg-muted;
+  }
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r
+           from-transparent via-white/25 to-transparent;
+  }
+}
+
+/* ==================================================================
+   أنماط الطباعة — الفواتير ووصولات الاستلام
+   ================================================================== */
+
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 11pt;
+  }
+
+  .no-print,
+  nav,
+  aside,
+  header.app-header,
+  button.no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .print-page {
+    page-break-after: always;
+    break-after: page;
+  }
+  .print-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  .print-avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  a[href]::after {
+    content: '';
+  }
+
+  .card,
+  table,
+  .print-box {
+    box-shadow: none !important;
+    border-color: #999 !important;
+  }
+}
+
+.print-only {
+  display: none;
+}
+
+/* طباعة على ورق حراري 80mm (طابعات نقاط البيع) */
+@media print {
+  .receipt-thermal {
+    width: 72mm;
+    font-size: 9pt;
+    line-height: 1.35;
+  }
+}

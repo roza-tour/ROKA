@@ -1,0 +1,1069 @@
+// =====================================================================
+//  ROKA ERP — مخطط قاعدة البيانات
+//  نظام إدارة محلات بيع وصيانة الأجهزة الإلكترونية
+//
+//  ملاحظات التصميم:
+//  - لا نستخدم enum أو Json على مستوى قاعدة البيانات حتى يبقى المخطط
+//    متوافقاً 100% بين SQLite و PostgreSQL و MySQL. القيم المسموحة
+//    معرّفة كأنواع TypeScript في src/lib/constants.ts.
+//  - كل الحقول المالية بنوع Float (كافٍ للعملات) — للتحويل إلى Decimal
+//    في PostgreSQL: استبدل Float بـ Decimal @db.Decimal(14,3).
+//  - كل جدول يحمل createdAt/updatedAt للتدقيق.
+// =====================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // للإنتاج غيّرها إلى "postgresql" وحدّث DATABASE_URL
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------
+//  الفروع والإعدادات
+// ---------------------------------------------------------------------
+
+model Branch {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  taxNumber String?
+  isDefault Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users        User[]
+  customers    Customer[]
+  repairOrders RepairOrder[]
+  invoices     Invoice[]
+  expenses     Expense[]
+  stockMoves   StockMovement[]
+  products     ProductStock[]
+
+  @@index([isActive])
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  group     String   @default("general")
+  type      String   @default("string") // string | number | boolean | json
+  updatedAt DateTime @updatedAt
+
+  @@index([group])
+}
+
+// ---------------------------------------------------------------------
+//  المستخدمون والصلاحيات
+// ---------------------------------------------------------------------
+
+model User {
+  id           String    @id @default(cuid())
+  username     String    @unique
+  email        String?   @unique
+  passwordHash String
+  fullName     String
+  phone        String?
+  role         String    @default("TECHNICIAN") // ADMIN | MANAGER | TECHNICIAN | CASHIER | RECEPTIONIST | ACCOUNTANT | VIEWER
+  permissions  String    @default("[]") // JSON: صلاحيات إضافية فوق الدور
+  avatarUrl    String?
+  isActive     Boolean   @default(true)
+  mustChangePw Boolean   @default(false)
+  lastLoginAt  DateTime?
+  failedLogins Int       @default(0)
+  lockedUntil  DateTime?
+
+  // بيانات وظيفية
+  jobTitle   String?
+  baseSalary Float     @default(0)
+  hireDate   DateTime?
+  nationalId String?
+  notes      String?
+
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions        Session[]
+  auditLogs       AuditLog[]
+  repairsReceived RepairOrder[]        @relation("ReceivedBy")
+  repairsAssigned RepairOrder[]        @relation("Technician")
+  repairHistory   RepairStatusEvent[]
+  invoices        Invoice[]
+  payments        Payment[]
+  expenses        Expense[]
+  stockMoves      StockMovement[]
+  attendance      Attendance[]
+  payrolls        Payroll[]
+  quotations      Quotation[]
+  purchases       PurchaseOrder[]
+  appointments    Appointment[]
+
+  @@index([role])
+  @@index([isActive])
+  @@index([branchId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  jti       String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ip        String?
+  userAgent String?
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model AuditLog {
+  id       String  @id @default(cuid())
+  userId   String?
+  user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userName String? // نسخة ثابتة من الاسم حتى لو حُذف المستخدم
+  action   String // CREATE | UPDATE | DELETE | LOGIN | LOGOUT | PRINT | EXPORT | ...
+  entity   String // Customer | RepairOrder | Invoice | ...
+  entityId String?
+  summary  String? // وصف مقروء للعملية
+  before   String? // JSON
+  after    String? // JSON
+  ip       String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
+}
+
+// ---------------------------------------------------------------------
+//  العملاء
+// ---------------------------------------------------------------------
+
+model Customer {
+  id        String  @id @default(cuid())
+  code      String  @unique
+  firstName String
+  lastName  String?
+  phone     String
+  phone2    String?
+  email     String?
+  address   String?
+  city      String?
+  taxNumber String?
+  notes     String?
+  type      String  @default("INDIVIDUAL") // INDIVIDUAL | COMPANY
+
+  // إحصائيات محسوبة (تُحدَّث عند كل عملية لسرعة العرض)
+  visitsCount    Int   @default(0)
+  totalPurchases Float @default(0)
+  totalRepairs   Float @default(0)
+  balance        Float @default(0) // موجب = له رصيد، سالب = عليه دين
+  loyaltyPoints  Int   @default(0)
+
+  isActive  Boolean  @default(true)
+  isBlocked Boolean  @default(false)
+  branchId  String?
+  branch    Branch?  @relation(fields: [branchId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  devices      Device[]
+  repairOrders RepairOrder[]
+  invoices     Invoice[]
+  quotations   Quotation[]
+  payments     Payment[]
+  loyaltyMoves LoyaltyTransaction[]
+  warranties   Warranty[]
+  installments InstallmentPlan[]
+  appointments Appointment[]
+  notifications NotificationLog[]
+
+  @@index([phone])
+  @@index([firstName, lastName])
+  @@index([isActive])
+}
+
+model LoyaltyTransaction {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  points     Int // موجب = كسب، سالب = استبدال
+  reason     String
+  refType    String? // Invoice | RepairOrder | MANUAL
+  refId      String?
+  createdAt  DateTime @default(now())
+
+  @@index([customerId])
+}
+
+// ---------------------------------------------------------------------
+//  الأجهزة
+// ---------------------------------------------------------------------
+
+model Device {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  type         String // PHONE | TABLET | LAPTOP | DESKTOP | CONSOLE | WATCH | ACCESSORY | OTHER
+  brand        String
+  model        String
+  color        String?
+  serialNumber String?
+  imei         String?
+  imei2        String?
+  passcodeEnc  String? // مشفّرة (AES-256-GCM)
+  purchaseDate DateTime?
+  notes        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  repairOrders RepairOrder[]
+  quotations   Quotation[]
+
+  @@index([customerId])
+  @@index([imei])
+  @@index([serialNumber])
+}
+
+// ---------------------------------------------------------------------
+//  أوامر الصيانة
+// ---------------------------------------------------------------------
+
+model RepairOrder {
+  id     String @id @default(cuid())
+  number String @unique // RO-2026-000123
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  deviceId   String
+  device     Device   @relation(fields: [deviceId], references: [id])
+
+  branchId     String?
+  branch       Branch? @relation(fields: [branchId], references: [id])
+  receivedById String?
+  receivedBy   User?   @relation("ReceivedBy", fields: [receivedById], references: [id])
+  technicianId String?
+  technician   User?   @relation("Technician", fields: [technicianId], references: [id])
+
+  status   String @default("RECEIVED") // RECEIVED | DIAGNOSING | WAITING_APPROVAL | WAITING_PARTS | REPAIRING | READY | DELIVERED | CANCELLED | UNREPAIRABLE
+  priority String @default("NORMAL") // LOW | NORMAL | HIGH | URGENT
+
+  problemDescription String
+  faultCategory      String? // تصنيف العطل لتقارير الأعطال الأكثر تكراراً
+  diagnosis          String?
+  workDone           String?
+  internalNotes      String?
+
+  // JSON structures
+  accessories     String @default("{}") // { battery:true, charger:false, ... , custom:[] }
+  conditionReport String @default("{}") // { screen:"OK", camera:"FAULTY", ... }
+  damageMarks     String @default("[]") // [{x,y,type,note}]
+  photos          String @default("[]") // ["/uploads/xxx.jpg"]
+
+  customerSignature String? // data:image/png;base64
+  employeeSignature String?
+
+  estimatedCost Float  @default(0)
+  finalCost     Float  @default(0)
+  partsCost     Float  @default(0)
+  laborCost     Float  @default(0)
+  depositAmount Float  @default(0)
+
+  receivedAt   DateTime  @default(now())
+  promisedAt   DateTime?
+  diagnosedAt  DateTime?
+  approvedAt   DateTime?
+  completedAt  DateTime?
+  deliveredAt  DateTime?
+
+  warrantyDays  Int       @default(0)
+  warrantyEndsAt DateTime?
+  warrantyTerms String?
+
+  trackingToken String  @unique
+  isArchived    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items      RepairItem[]
+  history    RepairStatusEvent[]
+  invoices   Invoice[]
+  warranties Warranty[]
+
+  @@index([status])
+  @@index([customerId])
+  @@index([technicianId])
+  @@index([receivedAt])
+  @@index([promisedAt])
+  @@index([branchId])
+}
+
+model RepairItem {
+  id            String      @id @default(cuid())
+  repairOrderId String
+  repairOrder   RepairOrder @relation(fields: [repairOrderId], references: [id], onDelete: Cascade)
+
+  kind      String // SERVICE | PART | CUSTOM
+  serviceId String?
+  service   Service? @relation(fields: [serviceId], references: [id])
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+
+  name      String
+  quantity  Float  @default(1)
+  unitPrice Float  @default(0)
+  unitCost  Float  @default(0)
+  discount  Float  @default(0)
+  total     Float  @default(0)
+  notes     String?
+
+  createdAt DateTime @default(now())
+
+  @@index([repairOrderId])
+}
+
+model RepairStatusEvent {
+  id            String      @id @default(cuid())
+  repairOrderId String
+  repairOrder   RepairOrder @relation(fields: [repairOrderId], references: [id], onDelete: Cascade)
+  status        String
+  note          String?
+  userId        String?
+  user          User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  notifiedAt    DateTime?
+  createdAt     DateTime    @default(now())
+
+  @@index([repairOrderId])
+}
+
+// ---------------------------------------------------------------------
+//  كتالوج الخدمات
+// ---------------------------------------------------------------------
+
+model ServiceCategory {
+  id         String  @id @default(cuid())
+  name       String
+  nameFr     String?
+  nameEn     String?
+  deviceType String  @default("ALL") // PHONE | TABLET | LAPTOP | DESKTOP | CONSOLE | ALL
+  icon       String?
+  sortOrder  Int     @default(0)
+  isActive   Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  services Service[]
+}
+
+model Service {
+  id     String @id @default(cuid())
+  code   String @unique
+  name   String
+  nameFr String?
+  nameEn String?
+
+  categoryId String?
+  category   ServiceCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  deviceType       String  @default("ALL")
+  description      String?
+  price            Float   @default(0)
+  cost             Float   @default(0) // تكلفة تقديرية (قطع/وقت)
+  estimatedMinutes Int     @default(30)
+  warrantyDays     Int     @default(0)
+  requiresParts    Boolean @default(false)
+  isActive         Boolean @default(true)
+  sortOrder        Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  repairItems    RepairItem[]
+  invoiceItems   InvoiceItem[]
+  quotationItems QuotationItem[]
+
+  @@index([categoryId])
+  @@index([deviceType])
+  @@index([isActive])
+}
+
+// ---------------------------------------------------------------------
+//  المخزون
+// ---------------------------------------------------------------------
+
+model ProductCategory {
+  id        String  @id @default(cuid())
+  name      String
+  nameFr    String?
+  nameEn    String?
+  parentId  String?
+  parent    ProductCategory?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children  ProductCategory[] @relation("CategoryTree")
+  icon      String?
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+}
+
+model Product {
+  id      String  @id @default(cuid())
+  sku     String  @unique
+  barcode String? @unique
+  name    String
+  nameFr  String?
+  nameEn  String?
+
+  type        String // DEVICE | PART | ACCESSORY | CONSUMABLE
+  categoryId  String?
+  category    ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  brand       String?
+  model       String?
+  compatibleWith String? // موديلات متوافقة (نص حر / JSON)
+  description String?
+  imageUrl    String?
+  unit        String  @default("PCS")
+
+  costPrice     Float @default(0)
+  sellPrice     Float @default(0)
+  wholesalePrice Float @default(0)
+  taxRate       Float @default(0)
+
+  quantity    Float   @default(0) // إجمالي عبر كل الفروع
+  minQuantity Float   @default(0)
+  maxQuantity Float   @default(0)
+  location    String? // موقع التخزين (رف/درج)
+
+  supplierId String?
+  supplier   Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+
+  trackSerial  Boolean @default(false)
+  warrantyDays Int     @default(0)
+  isActive     Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stockMoves     StockMovement[]
+  invoiceItems   InvoiceItem[]
+  repairItems    RepairItem[]
+  quotationItems QuotationItem[]
+  purchaseItems  PurchaseItem[]
+  branchStock    ProductStock[]
+
+  @@index([type])
+  @@index([categoryId])
+  @@index([supplierId])
+  @@index([isActive])
+  @@index([name])
+}
+
+// كمية المنتج لكل فرع (لدعم تعدد الفروع)
+model ProductStock {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  branchId  String
+  branch    Branch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  quantity  Float   @default(0)
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId, branchId])
+  @@index([branchId])
+}
+
+model StockMovement {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  branchId  String?
+  branch    Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  type       String // IN | OUT | ADJUST | RETURN_IN | RETURN_OUT | TRANSFER | DAMAGE
+  quantity   Float // موجب دائماً؛ الاتجاه محدد بـ type
+  balanceAfter Float @default(0)
+  unitCost   Float  @default(0)
+  reason     String?
+  refType    String? // Invoice | RepairOrder | PurchaseOrder | MANUAL
+  refId      String?
+  refNumber  String?
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([refType, refId])
+}
+
+model Supplier {
+  id      String  @id @default(cuid())
+  code    String  @unique
+  name    String
+  company String?
+  phone   String?
+  phone2  String?
+  email   String?
+  address String?
+  taxNumber String?
+  notes   String?
+  balance Float   @default(0) // ما علينا للمورد
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products  Product[]
+  purchases PurchaseOrder[]
+
+  @@index([name])
+}
+
+model PurchaseOrder {
+  id         String   @id @default(cuid())
+  number     String   @unique
+  supplierId String
+  supplier   Supplier @relation(fields: [supplierId], references: [id])
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  status      String @default("DRAFT") // DRAFT | ORDERED | RECEIVED | PARTIAL | CANCELLED
+  subtotal    Float  @default(0)
+  discount    Float  @default(0)
+  tax         Float  @default(0)
+  shipping    Float  @default(0)
+  total       Float  @default(0)
+  paidAmount  Float  @default(0)
+  notes       String?
+  orderedAt   DateTime @default(now())
+  receivedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items PurchaseItem[]
+
+  @@index([supplierId])
+  @@index([status])
+}
+
+model PurchaseItem {
+  id         String        @id @default(cuid())
+  purchaseId String
+  purchase   PurchaseOrder @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product       @relation(fields: [productId], references: [id])
+
+  quantity         Float @default(1)
+  receivedQuantity Float @default(0)
+  unitCost         Float @default(0)
+  total            Float @default(0)
+
+  @@index([purchaseId])
+}
+
+// ---------------------------------------------------------------------
+//  الفواتير والمبيعات
+// ---------------------------------------------------------------------
+
+model Invoice {
+  id     String @id @default(cuid())
+  number String @unique // INV-2026-000123
+
+  type String @default("SALE") // SALE | REPAIR | SERVICE | RETURN
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  repairOrderId String?
+  repairOrder   RepairOrder? @relation(fields: [repairOrderId], references: [id], onDelete: SetNull)
+
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id])
+  userId   String?
+  user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  status String @default("UNPAID") // DRAFT | UNPAID | PARTIAL | PAID | REFUNDED | CANCELLED
+
+  subtotal       Float  @default(0)
+  discountType   String @default("FIXED") // FIXED | PERCENT
+  discountValue  Float  @default(0)
+  discountAmount Float  @default(0)
+  taxRate        Float  @default(0)
+  taxAmount      Float  @default(0)
+  total          Float  @default(0)
+  paidAmount     Float  @default(0)
+  dueAmount      Float  @default(0)
+  costTotal      Float  @default(0) // مجموع التكلفة لحساب الربح
+  profit         Float  @default(0)
+
+  couponId String?
+  coupon   Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
+
+  notes        String?
+  terms        String?
+  warrantyDays Int       @default(0)
+  warrantyEndsAt DateTime?
+
+  issuedAt DateTime  @default(now())
+  dueDate  DateTime?
+  paidAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items        InvoiceItem[]
+  payments     Payment[]
+  warranties   Warranty[]
+  installments InstallmentPlan[]
+
+  @@index([status])
+  @@index([customerId])
+  @@index([issuedAt])
+  @@index([type])
+  @@index([branchId])
+}
+
+model InvoiceItem {
+  id        String  @id @default(cuid())
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  kind      String // PRODUCT | SERVICE | REPAIR | CUSTOM
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  serviceId String?
+  service   Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  name        String
+  description String?
+  quantity    Float  @default(1)
+  unitPrice   Float  @default(0)
+  unitCost    Float  @default(0)
+  discount    Float  @default(0)
+  taxRate     Float  @default(0)
+  total       Float  @default(0)
+
+  @@index([invoiceId])
+  @@index([productId])
+  @@index([serviceId])
+}
+
+model Payment {
+  id        String  @id @default(cuid())
+  invoiceId String?
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  amount    Float
+  method    String // CASH | CARD | BANK_TRANSFER | WALLET | CREDIT | CHECK
+  reference String?
+  notes     String?
+  direction String @default("IN") // IN | OUT (استرجاع)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  installmentId String?      @unique
+  installment   Installment? @relation(fields: [installmentId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([invoiceId])
+  @@index([customerId])
+  @@index([createdAt])
+  @@index([method])
+}
+
+model Coupon {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  description String?
+  type        String   @default("PERCENT") // PERCENT | FIXED
+  value       Float    @default(0)
+  minAmount   Float    @default(0)
+  maxDiscount Float    @default(0) // 0 = بلا حد
+  usageLimit  Int      @default(0) // 0 = بلا حد
+  usedCount   Int      @default(0)
+  startsAt    DateTime @default(now())
+  endsAt      DateTime?
+  isActive    Boolean  @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  invoices  Invoice[]
+}
+
+// ---------------------------------------------------------------------
+//  عروض الأسعار
+// ---------------------------------------------------------------------
+
+model Quotation {
+  id     String @id @default(cuid())
+  number String @unique // QT-2026-000123
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  deviceId   String?
+  device     Device?  @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  status String @default("DRAFT") // DRAFT | SENT | ACCEPTED | REJECTED | EXPIRED | CONVERTED
+
+  subtotal       Float  @default(0)
+  discountType   String @default("FIXED")
+  discountValue  Float  @default(0)
+  discountAmount Float  @default(0)
+  taxRate        Float  @default(0)
+  taxAmount      Float  @default(0)
+  total          Float  @default(0)
+
+  notes      String?
+  terms      String?
+  validUntil DateTime?
+
+  convertedInvoiceId String?
+  convertedRepairId  String?
+  convertedAt        DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items QuotationItem[]
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model QuotationItem {
+  id          String    @id @default(cuid())
+  quotationId String
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  kind      String // PRODUCT | SERVICE | CUSTOM
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  serviceId String?
+  service   Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  name        String
+  description String?
+  quantity    Float  @default(1)
+  unitPrice   Float  @default(0)
+  unitCost    Float  @default(0)
+  discount    Float  @default(0)
+  total       Float  @default(0)
+
+  @@index([quotationId])
+}
+
+// ---------------------------------------------------------------------
+//  الضمان
+// ---------------------------------------------------------------------
+
+model Warranty {
+  id     String @id @default(cuid())
+  number String @unique
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  invoiceId     String?
+  invoice       Invoice?     @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  repairOrderId String?
+  repairOrder   RepairOrder? @relation(fields: [repairOrderId], references: [id], onDelete: SetNull)
+
+  itemName   String
+  serial     String?
+  days       Int      @default(0)
+  startsAt   DateTime @default(now())
+  endsAt     DateTime
+  terms      String?
+  status     String   @default("ACTIVE") // ACTIVE | EXPIRED | CLAIMED | VOID
+  claimNotes String?
+  reminderSentAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([endsAt])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------
+//  الديون والأقساط
+// ---------------------------------------------------------------------
+
+model InstallmentPlan {
+  id         String   @id @default(cuid())
+  number     String   @unique
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  invoiceId  String?
+  invoice    Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  totalAmount Float  @default(0)
+  downPayment Float  @default(0)
+  months      Int    @default(1)
+  status      String @default("ACTIVE") // ACTIVE | COMPLETED | DEFAULTED | CANCELLED
+  startDate   DateTime @default(now())
+  notes       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  installments Installment[]
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model Installment {
+  id     String          @id @default(cuid())
+  planId String
+  plan   InstallmentPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  sequence Int
+  amount   Float
+  dueDate  DateTime
+  paidAt   DateTime?
+  status   String @default("PENDING") // PENDING | PAID | OVERDUE | WAIVED
+
+  payment Payment?
+
+  @@index([planId])
+  @@index([dueDate])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------
+//  المصروفات
+// ---------------------------------------------------------------------
+
+model ExpenseCategory {
+  id        String  @id @default(cuid())
+  name      String  @unique
+  nameFr    String?
+  nameEn    String?
+  icon      String?
+  color     String?
+  isRecurringDefault Boolean @default(false)
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  expenses  Expense[]
+}
+
+model Expense {
+  id         String          @id @default(cuid())
+  number     String          @unique
+  categoryId String?
+  category   ExpenseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  description   String
+  amount        Float
+  date          DateTime @default(now())
+  paymentMethod String   @default("CASH")
+  vendor        String?
+  reference     String?
+  receiptUrl    String?
+  notes         String?
+
+  isRecurring Boolean   @default(false)
+  recurrence  String? // DAILY | WEEKLY | MONTHLY | QUARTERLY | YEARLY
+  nextDueDate DateTime?
+  reminderDays Int      @default(3)
+  reminderSentAt DateTime?
+
+  userId   String?
+  user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([date])
+  @@index([isRecurring, nextDueDate])
+}
+
+// ---------------------------------------------------------------------
+//  الموارد البشرية
+// ---------------------------------------------------------------------
+
+model Attendance {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date     DateTime // منتصف ليل اليوم
+  checkIn  DateTime?
+  checkOut DateTime?
+  minutes  Int      @default(0)
+  status   String   @default("PRESENT") // PRESENT | ABSENT | LATE | LEAVE | HOLIDAY
+  notes    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([date])
+}
+
+model Payroll {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  period     String // 2026-07
+  baseSalary Float  @default(0)
+  bonuses    Float  @default(0)
+  commissions Float @default(0)
+  deductions Float  @default(0)
+  advances   Float  @default(0)
+  netAmount  Float  @default(0)
+  status     String @default("PENDING") // PENDING | PAID
+  paidAt     DateTime?
+  notes      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, period])
+  @@index([period])
+}
+
+// ---------------------------------------------------------------------
+//  الإشعارات
+// ---------------------------------------------------------------------
+
+model NotificationTemplate {
+  id      String  @id @default(cuid())
+  key     String // repair.received | repair.ready | warranty.expiring ...
+  channel String // SMS | WHATSAPP | EMAIL
+  locale  String  @default("ar")
+  subject String?
+  body    String
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([key, channel, locale])
+}
+
+model NotificationLog {
+  id      String @id @default(cuid())
+  channel String // SMS | WHATSAPP | EMAIL | INTERNAL
+  toAddress String
+  subject String?
+  body    String
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  templateKey String?
+  refType     String?
+  refId       String?
+
+  status    String @default("PENDING") // PENDING | SENT | FAILED | SKIPPED
+  provider  String?
+  error     String?
+  attempts  Int    @default(0)
+  sentAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([channel])
+  @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------
+//  المواعيد
+// ---------------------------------------------------------------------
+
+model Appointment {
+  id         String    @id @default(cuid())
+  number     String    @unique
+  customerId String?
+  customer   Customer?  @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  customerName  String
+  customerPhone String
+  deviceType    String  @default("PHONE")
+  description   String?
+
+  scheduledAt     DateTime
+  durationMinutes Int      @default(30)
+  status          String   @default("SCHEDULED") // SCHEDULED | CONFIRMED | ARRIVED | DONE | CANCELLED | NO_SHOW
+
+  assignedToId String?
+  assignedTo   User?   @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([scheduledAt])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------
+//  النسخ الاحتياطي
+// ---------------------------------------------------------------------
+
+model BackupLog {
+  id        String   @id @default(cuid())
+  filename  String
+  sizeBytes Int      @default(0)
+  type      String   @default("MANUAL") // MANUAL | AUTO
+  status    String   @default("SUCCESS") // SUCCESS | FAILED
+  error     String?
+  createdBy String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------
+//  العدّادات (لترقيم المستندات بشكل آمن)
+// ---------------------------------------------------------------------
+
+model Counter {
+  id     String @id @default(cuid())
+  key    String @unique // RO-2026 | INV-2026 | QT-2026 ...
+  value  Int    @default(0)
+
+  updatedAt DateTime @updatedAt
+}
