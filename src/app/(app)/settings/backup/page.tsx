@@ -1,7 +1,8 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import { DatabaseBackup, History } from 'lucide-react';
 
-import { requirePermission, getCurrentUser } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { getI18n } from '@/i18n';
 import { db } from '@/lib/db';
@@ -21,7 +22,7 @@ function formatBytes(bytes: number): string {
 }
 
 export default async function BackupPage() {
-  await requirePermission('settings:view');
+  await pagePermission('settings:view');
   const user = await getCurrentUser();
   const { locale, t } = await getI18n();
 

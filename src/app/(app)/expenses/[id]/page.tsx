@@ -1,6 +1,7 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { requirePermission } from '@/lib/auth';
+
 import { getI18n } from '@/i18n';
 import { db } from '@/lib/db';
 import { PageHeader } from '@/components/ui/page';
@@ -14,7 +15,7 @@ export default async function EditExpensePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requirePermission('expenses:update');
+  await pagePermission('expenses:update');
   const { t } = await getI18n();
   const { id } = await params;
 

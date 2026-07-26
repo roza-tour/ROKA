@@ -1,5 +1,6 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
-import { requirePermission } from '@/lib/auth';
+
 import { getI18n } from '@/i18n';
 import { db } from '@/lib/db';
 import { PageHeader } from '@/components/ui/page';
@@ -9,7 +10,7 @@ import { productFormLabels } from '../labels';
 export const metadata: Metadata = { title: 'منتج جديد' };
 
 export default async function NewProductPage() {
-  await requirePermission('inventory:create');
+  await pagePermission('inventory:create');
   const { t } = await getI18n();
 
   const [categories, suppliers] = await Promise.all([

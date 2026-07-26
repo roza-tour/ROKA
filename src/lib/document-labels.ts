@@ -13,6 +13,7 @@ export function documentLabels(t: Dictionary): Record<string, string> {
     selectCustomer: t.pos.selectCustomer,
     searchCustomer: t.customer.searchHint,
     fromRepair: t.repair.single,
+    fromQuotation: t.quotation.single,
 
     items: t.invoice.items,
     item: t.invoice.item,

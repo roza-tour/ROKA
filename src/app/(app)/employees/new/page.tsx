@@ -1,5 +1,6 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
-import { requirePermission } from '@/lib/auth';
+
 import { getI18n } from '@/i18n';
 import { db } from '@/lib/db';
 import { PageHeader } from '@/components/ui/page';
@@ -13,7 +14,7 @@ import {
 export const metadata: Metadata = { title: 'موظف جديد' };
 
 export default async function NewEmployeePage() {
-  await requirePermission('employees:create');
+  await pagePermission('employees:create');
   const { t } = await getI18n();
 
   const branches = await db.branch.findMany({

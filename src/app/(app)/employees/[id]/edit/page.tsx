@@ -1,6 +1,7 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { requirePermission } from '@/lib/auth';
+
 import { getI18n } from '@/i18n';
 import { db } from '@/lib/db';
 import { safeJsonParse } from '@/lib/utils';
@@ -19,7 +20,7 @@ export default async function EditEmployeePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requirePermission('employees:update');
+  await pagePermission('employees:update');
   const { t } = await getI18n();
   const { id } = await params;
 

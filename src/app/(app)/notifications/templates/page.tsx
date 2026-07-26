@@ -1,5 +1,6 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
-import { requirePermission, getCurrentUser } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { getI18n } from '@/i18n';
 import { db } from '@/lib/db';
@@ -40,7 +41,7 @@ const KEY_LABELS: Record<string, string> = {
 };
 
 export default async function TemplatesPage() {
-  await requirePermission('notifications:view');
+  await pagePermission('notifications:view');
   const user = await getCurrentUser();
   const { t } = await getI18n();
 

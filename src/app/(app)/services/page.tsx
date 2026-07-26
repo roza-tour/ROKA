@@ -1,7 +1,8 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import type { Prisma } from '@prisma/client';
 
-import { requirePermission, getCurrentUser } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { getI18n } from '@/i18n';
 import { getFinanceSettings } from '@/lib/settings';
@@ -21,7 +22,7 @@ export default async function ServicesPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requirePermission('services:view');
+  await pagePermission('services:view');
   const user = await getCurrentUser();
   const { locale, t } = await getI18n();
   const finance = await getFinanceSettings();

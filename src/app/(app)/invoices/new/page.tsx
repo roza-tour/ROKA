@@ -1,5 +1,6 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
-import { requirePermission } from '@/lib/auth';
+
 import { getI18n } from '@/i18n';
 import { getFinanceSettings, getSettings } from '@/lib/settings';
 import { db } from '@/lib/db';
@@ -17,7 +18,7 @@ export default async function NewInvoicePage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requirePermission('invoices:create');
+  await pagePermission('invoices:create');
   const { locale, t } = await getI18n();
   const [finance, settings] = await Promise.all([getFinanceSettings(), getSettings()]);
   const params = await searchParams;
@@ -56,6 +57,7 @@ export default async function NewInvoicePage({
   let initialLines: BuilderLine[] = [];
   let initialCustomerId: string | undefined;
   let repairNumber: string | undefined;
+  let quotationNumber: string | undefined;
   let uidSeed = 0;
 
   if (repairId) {
@@ -90,6 +92,7 @@ export default async function NewInvoicePage({
     });
     if (quotation) {
       initialCustomerId = quotation.customerId;
+      quotationNumber = quotation.number;
       initialLines = quotation.items.map((item) => ({
         uid: `seed-${++uidSeed}`,
         kind: item.kind as BuilderLine['kind'],
@@ -135,6 +138,8 @@ export default async function NewInvoicePage({
         initialCustomerId={initialCustomerId}
         repairOrderId={repairId}
         repairNumber={repairNumber}
+        quotationId={quotationId}
+        quotationNumber={quotationNumber}
         defaultTaxRate={finance.taxRate}
         taxEnabled={finance.taxEnabled}
         defaultTerms={settings['invoice.terms'] ?? ''}

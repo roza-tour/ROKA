@@ -1,6 +1,7 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { requirePermission } from '@/lib/auth';
+
 import { getI18n } from '@/i18n';
 import { getFinanceSettings, getShopInfo } from '@/lib/settings';
 import { db } from '@/lib/db';
@@ -23,7 +24,7 @@ export default async function BarcodeSheetPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requirePermission('inventory:view');
+  await pagePermission('inventory:view');
   const { locale, t } = await getI18n();
   const [finance, shop] = await Promise.all([getFinanceSettings(), getShopInfo()]);
   const { id } = await params;

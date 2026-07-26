@@ -1,5 +1,6 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
-import { requirePermission, getCurrentUser } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { getI18n } from '@/i18n';
 import { getFinanceSettings } from '@/lib/settings';
@@ -11,7 +12,7 @@ export const metadata: Metadata = { title: 'كوبونات الخصم' };
 export const dynamic = 'force-dynamic';
 
 export default async function CouponsPage() {
-  await requirePermission('settings:view');
+  await pagePermission('settings:view');
   const user = await getCurrentUser();
   const { locale, t } = await getI18n();
   const finance = await getFinanceSettings();

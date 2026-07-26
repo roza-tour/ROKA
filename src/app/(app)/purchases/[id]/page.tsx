@@ -1,9 +1,10 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Truck, PackageCheck, Wallet } from 'lucide-react';
 
-import { requirePermission, getCurrentUser } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { getI18n } from '@/i18n';
 import { getFinanceSettings } from '@/lib/settings';
@@ -22,7 +23,7 @@ export default async function PurchaseDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requirePermission('purchases:view');
+  await pagePermission('purchases:view');
   const user = await getCurrentUser();
   const { locale, t } = await getI18n();
   const finance = await getFinanceSettings();

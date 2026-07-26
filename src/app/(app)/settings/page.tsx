@@ -1,8 +1,9 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Store, Wallet, Wrench, Receipt, Gift, Palette, Building2, Ticket, DatabaseBackup } from 'lucide-react';
 
-import { requirePermission, getCurrentUser } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { getI18n } from '@/i18n';
 import { getSettings } from '@/lib/settings';
@@ -16,7 +17,7 @@ export const metadata: Metadata = { title: 'الإعدادات' };
 export const dynamic = 'force-dynamic';
 
 export default async function SettingsPage() {
-  await requirePermission('settings:view');
+  await pagePermission('settings:view');
   const user = await getCurrentUser();
   const { t } = await getI18n();
   const settings = await getSettings();

@@ -251,6 +251,18 @@ export async function createInvoiceAction(
         });
       }
 
+      // 10) تعليم عرض السعر كمحوّل
+      if (input.quotationId) {
+        await tx.quotation.updateMany({
+          where: { id: input.quotationId, status: { not: 'CONVERTED' } },
+          data: {
+            status: 'CONVERTED',
+            convertedInvoiceId: created.id,
+            convertedAt: now,
+          },
+        });
+      }
+
       return created;
     });
 
@@ -279,6 +291,7 @@ export async function createInvoiceAction(
 
   revalidatePath('/invoices');
   revalidatePath('/dashboard');
+  revalidatePath('/quotations');
 
   if (redirectTo === 'none') {
     return { ok: true, message: 'تم إنشاء الفاتورة', id: createdId };

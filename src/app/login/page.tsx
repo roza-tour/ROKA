@@ -10,12 +10,18 @@ import { Wrench, Smartphone, Laptop, ShieldCheck } from 'lucide-react';
 
 export const metadata: Metadata = { title: 'تسجيل الدخول' };
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const user = await getCurrentUser();
   if (user) redirect('/dashboard');
 
   const { t } = await getI18n();
   const shop = await getShopInfo();
+  const params = await searchParams;
+  const next = typeof params.next === 'string' ? params.next : undefined;
 
   return (
     <main className="flex min-h-dvh flex-col lg:flex-row">
@@ -81,6 +87,7 @@ export default async function LoginPage() {
           </div>
 
           <LoginForm
+            next={next}
             labels={{
               username: t.auth.usernameOrEmail,
               password: t.auth.password,

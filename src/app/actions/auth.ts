@@ -28,6 +28,16 @@ const loginSchema = z.object({
   password: z.string().min(1, 'أدخل كلمة المرور'),
 });
 
+/**
+ * وجهة آمنة بعد الدخول: نقبل المسارات الداخلية فقط.
+ * هذا يمنع إعادة التوجيه المفتوح (open redirect) إلى موقع خارجي.
+ */
+function safeRedirect(next: unknown): string {
+  if (typeof next !== 'string' || !next.startsWith('/')) return '/dashboard';
+  if (next.startsWith('//') || next.includes('\\')) return '/dashboard';
+  return next;
+}
+
 export async function loginAction(
   _prev: ActionState | null,
   formData: FormData,
@@ -60,7 +70,8 @@ export async function loginAction(
     user: result.user,
   });
 
-  redirect('/dashboard');
+  // العودة إلى الصفحة التي حاول المستخدم فتحها قبل تسجيل الدخول
+  redirect(safeRedirect(formData.get('next')));
 }
 
 export async function logoutAction(): Promise<void> {

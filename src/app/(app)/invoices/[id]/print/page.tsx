@@ -1,7 +1,7 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
-import { requirePermission } from '@/lib/auth';
 import { getI18n } from '@/i18n';
 import { getFinanceSettings, getShopInfo, getSettings } from '@/lib/settings';
 import { db } from '@/lib/db';
@@ -18,7 +18,7 @@ export default async function InvoicePrintPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requirePermission('invoices:view');
+  await pagePermission('invoices:view');
   const { locale, t } = await getI18n();
   const [finance, shop, settings] = await Promise.all([
     getFinanceSettings(),

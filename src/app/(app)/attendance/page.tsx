@@ -1,7 +1,8 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import { Clock, Users, CalendarCheck } from 'lucide-react';
 
-import { requirePermission, getCurrentUser } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { getI18n } from '@/i18n';
 import { db } from '@/lib/db';
@@ -29,7 +30,7 @@ export default async function AttendancePage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requirePermission('attendance:view');
+  await pagePermission('attendance:view');
   const user = await getCurrentUser();
   const { locale, t } = await getI18n();
   const params = await searchParams;

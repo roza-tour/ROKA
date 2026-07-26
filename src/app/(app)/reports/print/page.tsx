@@ -1,6 +1,6 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 
-import { requirePermission } from '@/lib/auth';
 import { getI18n } from '@/i18n';
 import { getFinanceSettings, getShopInfo } from '@/lib/settings';
 import { buildReport, REPORT_KEYS, type ReportKey } from '@/lib/reports';
@@ -24,7 +24,7 @@ export default async function ReportPrintPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requirePermission('reports:view');
+  await pagePermission('reports:view');
   const { locale, t } = await getI18n();
   const [finance, shop] = await Promise.all([getFinanceSettings(), getShopInfo()]);
   const params = await searchParams;

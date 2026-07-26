@@ -1,5 +1,6 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
-import { requirePermission } from '@/lib/auth';
+
 import { getI18n } from '@/i18n';
 import { PageHeader } from '@/components/ui/page';
 import { SupplierForm } from '../supplier-form';
@@ -8,7 +9,7 @@ import { supplierLabels } from '../labels';
 export const metadata: Metadata = { title: 'مورد جديد' };
 
 export default async function NewSupplierPage() {
-  await requirePermission('suppliers:create');
+  await pagePermission('suppliers:create');
   const { t } = await getI18n();
 
   return (

@@ -9,14 +9,19 @@ import { Field, Input } from '@/components/ui/form';
 
 export function LoginForm({
   labels,
+  next,
 }: {
   labels: { username: string; password: string; submit: string; submitting: string };
+  /** المسار الذي حاول المستخدم فتحه قبل تسجيل الدخول */
+  next?: string;
 }) {
   const [state, formAction] = useActionState<ActionState | null, FormData>(loginAction, null);
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <form action={formAction} className="space-y-4">
+      {next && <input type="hidden" name="next" value={next} />}
+
       {state?.error && (
         <div
           role="alert"

@@ -1,9 +1,10 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Plus, Phone, Users } from 'lucide-react';
 import type { Prisma } from '@prisma/client';
 
-import { requirePermission, getCurrentUser } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { getI18n } from '@/i18n';
 import { getFinanceSettings } from '@/lib/settings';
@@ -45,7 +46,7 @@ type CustomerRow = {
 };
 
 export default async function CustomersPage({ searchParams }: PageProps) {
-  await requirePermission('customers:view');
+  await pagePermission('customers:view');
   const user = await getCurrentUser();
   const { locale, t } = await getI18n();
   const finance = await getFinanceSettings();
@@ -134,7 +135,6 @@ export default async function CustomersPage({ searchParams }: PageProps) {
         <a
           href={`tel:${row.phone}`}
           className="numeric inline-flex items-center gap-1.5 hover:text-primary"
-          onClick={(e) => e.stopPropagation()}
         >
           <Phone className="h-3.5 w-3.5 text-muted-foreground" />
           {row.phone}

@@ -41,6 +41,8 @@ export function InvoiceBuilderForm({
   initialCustomerId,
   repairOrderId,
   repairNumber,
+  quotationId,
+  quotationNumber,
   defaultTaxRate,
   taxEnabled,
   defaultTerms,
@@ -56,6 +58,8 @@ export function InvoiceBuilderForm({
   initialCustomerId?: string;
   repairOrderId?: string;
   repairNumber?: string;
+  quotationId?: string;
+  quotationNumber?: string;
   defaultTaxRate: number;
   taxEnabled: boolean;
   defaultTerms: string;
@@ -136,6 +140,7 @@ export function InvoiceBuilderForm({
     type,
     customerId: customerId || null,
     repairOrderId: repairOrderId || null,
+    quotationId: quotationId || null,
     items: builder.lines
       .filter((l) => l.name.trim() && l.quantity > 0)
       .map((l) => ({
@@ -233,6 +238,13 @@ export function InvoiceBuilderForm({
         {repairNumber && (
           <p className="mt-3 rounded-md bg-info/10 p-2 text-sm text-info">
             {labels.fromRepair}: <span className="numeric font-medium">{repairNumber}</span>
+          </p>
+        )}
+
+        {quotationNumber && (
+          <p className="mt-3 rounded-md bg-info/10 p-2 text-sm text-info">
+            {labels.fromQuotation}:{' '}
+            <span className="numeric font-medium">{quotationNumber}</span>
           </p>
         )}
       </Card>

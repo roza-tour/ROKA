@@ -1,9 +1,10 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import * as Icons from 'lucide-react';
 import { FileSpreadsheet, FileText, Printer } from 'lucide-react';
 
-import { requirePermission, getCurrentUser } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { getI18n } from '@/i18n';
 import { getFinanceSettings } from '@/lib/settings';
@@ -40,7 +41,7 @@ export default async function ReportsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requirePermission('reports:view');
+  await pagePermission('reports:view');
   const user = await getCurrentUser();
   const { locale, t } = await getI18n();
   const finance = await getFinanceSettings();

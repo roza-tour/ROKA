@@ -1,7 +1,7 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
-import { requirePermission } from '@/lib/auth';
 import { getI18n } from '@/i18n';
 import { getFinanceSettings, getShopInfo, getSettings } from '@/lib/settings';
 import { db } from '@/lib/db';
@@ -16,7 +16,7 @@ export default async function QuotationPrintPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requirePermission('quotations:view');
+  await pagePermission('quotations:view');
   const { locale, t } = await getI18n();
   const [finance, shop, settings] = await Promise.all([
     getFinanceSettings(),

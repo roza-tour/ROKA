@@ -1,5 +1,6 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
-import { requirePermission, getCurrentUser } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { getI18n } from '@/i18n';
 import { db } from '@/lib/db';
@@ -10,7 +11,7 @@ export const metadata: Metadata = { title: 'الفروع' };
 export const dynamic = 'force-dynamic';
 
 export default async function BranchesPage() {
-  await requirePermission('settings:view');
+  await pagePermission('settings:view');
   const user = await getCurrentUser();
   const { t } = await getI18n();
 

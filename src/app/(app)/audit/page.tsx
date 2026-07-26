@@ -1,8 +1,8 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Prisma } from '@prisma/client';
 
-import { requirePermission } from '@/lib/auth';
 import { getI18n } from '@/i18n';
 import { db } from '@/lib/db';
 import { formatDateTime, normalizeDigits, endOfDay, safeJsonParse } from '@/lib/utils';
@@ -68,7 +68,7 @@ export default async function AuditPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requirePermission('audit:view');
+  await pagePermission('audit:view');
   const { locale, t } = await getI18n();
   const params = await searchParams;
 

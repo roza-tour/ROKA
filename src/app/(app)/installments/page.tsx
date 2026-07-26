@@ -1,8 +1,9 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CalendarRange, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
-import { requirePermission, getCurrentUser } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { getI18n } from '@/i18n';
 import { getFinanceSettings } from '@/lib/settings';
@@ -26,7 +27,7 @@ const INSTALLMENT_LABELS: Record<string, string> = {
 };
 
 export default async function InstallmentsPage() {
-  await requirePermission('invoices:view');
+  await pagePermission('invoices:view');
   const user = await getCurrentUser();
   const { locale, t } = await getI18n();
   const finance = await getFinanceSettings();

@@ -1,8 +1,9 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import { CalendarClock, CalendarCheck, CalendarX } from 'lucide-react';
 import type { Prisma } from '@prisma/client';
 
-import { requirePermission, getCurrentUser } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { getI18n } from '@/i18n';
 import { db } from '@/lib/db';
@@ -30,7 +31,7 @@ export default async function AppointmentsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requirePermission('appointments:view');
+  await pagePermission('appointments:view');
   const user = await getCurrentUser();
   const { locale, t } = await getI18n();
   const params = await searchParams;

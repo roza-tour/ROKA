@@ -1,7 +1,8 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import { Banknote, Wallet, Users } from 'lucide-react';
 
-import { requirePermission, getCurrentUser } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { getI18n } from '@/i18n';
 import { getFinanceSettings } from '@/lib/settings';
@@ -26,7 +27,7 @@ export default async function PayrollPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requirePermission('payroll:view');
+  await pagePermission('payroll:view');
   const user = await getCurrentUser();
   const { locale, t } = await getI18n();
   const finance = await getFinanceSettings();

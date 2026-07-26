@@ -1,8 +1,8 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Prisma } from '@prisma/client';
 
-import { requirePermission } from '@/lib/auth';
 import { getI18n } from '@/i18n';
 import { getFinanceSettings } from '@/lib/settings';
 import { db } from '@/lib/db';
@@ -61,7 +61,7 @@ export default async function StockMovementsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requirePermission('inventory:view');
+  await pagePermission('inventory:view');
   const { locale, t } = await getI18n();
   const finance = await getFinanceSettings();
   const params = await searchParams;

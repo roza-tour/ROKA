@@ -1,5 +1,6 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
-import { requirePermission } from '@/lib/auth';
+
 import { getI18n } from '@/i18n';
 import { db } from '@/lib/db';
 import { PageHeader } from '@/components/ui/page';
@@ -9,7 +10,7 @@ import { expenseFormLabels } from '../labels';
 export const metadata: Metadata = { title: 'مصروف جديد' };
 
 export default async function NewExpensePage() {
-  await requirePermission('expenses:create');
+  await pagePermission('expenses:create');
   const { t } = await getI18n();
 
   const categories = await db.expenseCategory.findMany({

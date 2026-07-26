@@ -1,8 +1,8 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { Prisma } from '@prisma/client';
 
-import { requirePermission } from '@/lib/auth';
 import { getI18n, type Dictionary, type Locale } from '@/i18n';
 import { getFinanceSettings, getShopInfo, getSettings, type ShopInfo } from '@/lib/settings';
 import { db } from '@/lib/db';
@@ -43,7 +43,7 @@ export default async function ReceiptPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requirePermission('repairs:view');
+  await pagePermission('repairs:view');
   const { locale, t } = await getI18n();
   const [finance, shop, settings] = await Promise.all([
     getFinanceSettings(),

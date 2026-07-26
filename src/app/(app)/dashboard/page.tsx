@@ -1,3 +1,4 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
@@ -18,7 +19,6 @@ import {
   FileText,
 } from 'lucide-react';
 
-import { requirePermission } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { getCurrentUser } from '@/lib/auth';
 import { getI18n } from '@/i18n';
@@ -49,7 +49,7 @@ export const metadata: Metadata = { title: 'لوحة التحكم' };
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  await requirePermission('dashboard:view');
+  await pagePermission('dashboard:view');
   const user = await getCurrentUser();
   const { locale, t } = await getI18n();
   const finance = await getFinanceSettings();

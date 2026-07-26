@@ -1,9 +1,10 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Bell, CheckCircle2, XCircle, Clock, FileText } from 'lucide-react';
 import type { Prisma } from '@prisma/client';
 
-import { requirePermission, getCurrentUser } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 import { can } from '@/lib/permissions';
 import { getI18n } from '@/i18n';
 import { db } from '@/lib/db';
@@ -52,7 +53,7 @@ export default async function NotificationsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requirePermission('notifications:view');
+  await pagePermission('notifications:view');
   const user = await getCurrentUser();
   const { locale, t } = await getI18n();
   const params = await searchParams;

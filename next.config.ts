@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['bwip-js', 'exceljs', 'bcryptjs'],
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts', 'date-fns'],
+    // يتيح forbidden()/unauthorized() لإرجاع 403/401 بدل 500 عند رفض الصلاحية
+    authInterrupts: true,
   },
   async headers() {
     return [

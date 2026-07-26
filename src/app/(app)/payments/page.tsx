@@ -1,9 +1,9 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Wallet, TrendingUp, CreditCard } from 'lucide-react';
 import type { Prisma } from '@prisma/client';
 
-import { requirePermission } from '@/lib/auth';
 import { getI18n } from '@/i18n';
 import { getFinanceSettings } from '@/lib/settings';
 import { db } from '@/lib/db';
@@ -57,7 +57,7 @@ export default async function PaymentsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requirePermission('payments:view');
+  await pagePermission('payments:view');
   const { locale, t } = await getI18n();
   const finance = await getFinanceSettings();
   const params = await searchParams;

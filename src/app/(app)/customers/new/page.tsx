@@ -1,5 +1,6 @@
+import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
-import { requirePermission } from '@/lib/auth';
+
 import { getI18n } from '@/i18n';
 import { PageHeader } from '@/components/ui/page';
 import { CustomerForm } from '../customer-form';
@@ -7,7 +8,7 @@ import { CustomerForm } from '../customer-form';
 export const metadata: Metadata = { title: 'عميل جديد' };
 
 export default async function NewCustomerPage() {
-  await requirePermission('customers:create');
+  await pagePermission('customers:create');
   const { t } = await getI18n();
 
   return (

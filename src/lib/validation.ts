@@ -292,6 +292,8 @@ export const invoiceSchema = z.object({
   type: z.enum(INVOICE_TYPES).default('SALE'),
   customerId: optionalString.optional(),
   repairOrderId: optionalString.optional(),
+  /** عرض السعر الذي حُوّلت منه الفاتورة — يُعلَّم كـ«محوّل» بعد الإنشاء */
+  quotationId: optionalString.optional(),
   items: z.array(invoiceItemSchema).min(1, 'أضف بنداً واحداً على الأقل'),
   discountType: z.enum(['FIXED', 'PERCENT']).default('FIXED'),
   discountValue: optionalNumber(0),
