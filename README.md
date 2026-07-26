@@ -11,6 +11,7 @@
 
 ## المحتويات
 
+- [نقطة التوقّف والاستئناف](docs/CHECKPOINT.md) ← **ابدأ من هنا لو عدت للمشروع بعد انقطاع**
 - [ما الذي يقدّمه النظام](#ما-الذي-يقدّمه-النظام)
 - [التقنيات](#التقنيات)
 - [الهوية البصرية](#الهوية-البصرية)
@@ -167,11 +168,11 @@ npx tsx prisma/seed-demo.ts
 | `npm run typecheck` | فحص الأنواع دون بناء |
 | `npm run setup` | توليد العميل + إنشاء الجداول + التعبئة |
 | `npm run db:push` | مزامنة المخطط مع قاعدة البيانات |
-| `npm run db:migrate` | إنشاء ملف ترحيل (للإنتاج) |
+| `npm run db:migrate` | إنشاء ملف ترحيل (عند الانتقال للهجرات) |
 | `npm run db:studio` | واجهة رسومية لقاعدة البيانات |
 | `npm run db:seed` | تعبئة البيانات الأساسية |
 | `npm run db:seed:demo` | تعبئة بيانات تجريبية |
-| `npm run db:deploy` | تطبيق الترحيلات (إنتاج) |
+| `npm run db:deploy` | تطبيق الترحيلات (بعد تبنّي الهجرات) |
 | `npm run db:sqlite` | ضبط المخطط على SQLite |
 | `npm run db:mysql` | ضبط المخطط على MySQL (cPanel) |
 | `npm run db:postgres` | ضبط المخطط على PostgreSQL |
@@ -336,8 +337,12 @@ MySQL لأن Prisma يحوّل `String` إلى `VARCHAR(191)` افتراضياً
 
 ```bash
 npx prisma generate
-npx prisma migrate deploy      # أو db push للتجربة
+npx prisma db push
 ```
+
+> لا يستعمل المشروع هجرات Prisma عمداً: ملفات الهجرة SQL خاصة بمزوّد واحد،
+> وهذا يكسر التوافق مع الأنواع الثلاثة. انتقل إليها عند الاستقرار على قاعدة
+> واحدة — الشرح في [docs/CPANEL.md](docs/CPANEL.md).
 
 الأنواع الثلاثة مُتحقَّق منها بـ `prisma validate`، والعودة إلى SQLite تعيد
 المخطط إلى حالته الأصلية تماماً. لا يوجد فهرس على أي عمود `TEXT` فلا تصطدم
