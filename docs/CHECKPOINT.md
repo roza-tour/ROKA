@@ -1,6 +1,14 @@
 # نقطة التوقّف — الانتقال إلى العمل المحلي
 
-> **الوسم:** `checkpoint-v1` · **الفرع:** `claude/electronics-repair-shop-erp-dm0qfg`
+> **الدفعة:** `5709331` · **الفرع:** `claude/electronics-repair-shop-erp-dm0qfg`
+>
+> وسيط Git في بيئة العمل السحابية لا يقبل دفع الوسوم (tags)، لذا العلامة
+> المرجعية هي رقم الدفعة أعلاه. بعد الاستنساخ على جهازك أنشئ الوسم محلياً:
+>
+> ```bash
+> git tag -a checkpoint-v1 5709331 -m "نقطة التوقّف الأولى"
+> git push origin checkpoint-v1     # يعمل من جهازك مباشرةً
+> ```
 >
 > هذه الوثيقة تختصر كل ما تحتاج معرفته لاستئناف العمل على جهازك دون العودة
 > إلى سجلّ المحادثة.
@@ -13,6 +21,7 @@
 git clone <رابط المستودع>
 cd roka                       # اسم المجلد كما استنسخته
 git checkout claude/electronics-repair-shop-erp-dm0qfg
+# للعودة إلى نقطة التوقّف بالضبط:  git checkout 5709331
 
 npm install
 
