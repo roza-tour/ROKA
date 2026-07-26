@@ -1,27 +1,11 @@
 import type { Metadata } from 'next';
 import { requirePermission } from '@/lib/auth';
-import { getI18n, type Dictionary } from '@/i18n';
+import { getI18n } from '@/i18n';
 import { PageHeader } from '@/components/ui/page';
 import { SupplierForm } from '../supplier-form';
+import { supplierLabels } from '../labels';
 
 export const metadata: Metadata = { title: 'مورد جديد' };
-
-export function supplierLabels(t: Dictionary) {
-  return {
-    section: t.supplier.single,
-    name: t.supplier.name,
-    company: t.supplier.company,
-    phone: t.supplier.phone,
-    phone2: t.customer.phone2,
-    email: t.supplier.email,
-    address: t.supplier.address,
-    taxNumber: t.customer.taxNumber,
-    notes: t.customer.notes,
-    active: t.service.active,
-    save: t.actions.save,
-    cancel: t.actions.cancel,
-  };
-}
 
 export default async function NewSupplierPage() {
   await requirePermission('suppliers:create');

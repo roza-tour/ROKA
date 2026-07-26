@@ -5,7 +5,7 @@ import { getI18n } from '@/i18n';
 import { db } from '@/lib/db';
 import { PageHeader } from '@/components/ui/page';
 import { SupplierForm } from '../../supplier-form';
-import { supplierLabels } from '../../new/page';
+import { supplierLabels } from '../../labels';
 
 export const metadata: Metadata = { title: 'تعديل مورد' };
 
