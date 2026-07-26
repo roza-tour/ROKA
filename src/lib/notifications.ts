@@ -234,7 +234,7 @@ async function sendViaProvider(
     case 'WHATSAPP':
       return sendWhatsApp(to, body, attachment);
     case 'EMAIL':
-      return sendEmail(to, subject ?? 'ROKA', body, attachment);
+      return sendEmail(to, subject ?? 'FIXEL', body, attachment);
     case 'INTERNAL':
       return 'internal';
     default:
@@ -399,7 +399,7 @@ async function sendEmail(
         : undefined,
     });
     await transporter.sendMail({
-      from: process.env.SMTP_FROM ?? 'ROKA <no-reply@roka.local>',
+      from: process.env.SMTP_FROM ?? 'FIXEL <no-reply@fixel.local>',
       to,
       subject,
       text: body,

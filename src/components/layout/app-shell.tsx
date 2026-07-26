@@ -51,12 +51,12 @@ export function AppShell({
 
   // استرجاع حالة الطيّ
   useEffect(() => {
-    setCollapsed(localStorage.getItem('roka_sidebar_collapsed') === 'true');
+    setCollapsed(localStorage.getItem('fixel_sidebar_collapsed') === 'true');
   }, []);
 
   function toggleCollapsed() {
     setCollapsed((v) => {
-      localStorage.setItem('roka_sidebar_collapsed', String(!v));
+      localStorage.setItem('fixel_sidebar_collapsed', String(!v));
       return !v;
     });
   }
@@ -221,7 +221,7 @@ function BrandHeader({
         <span className="flex min-w-0 flex-col leading-none">
           <span className="truncate text-lg font-bold tracking-wide">{shopName}</span>
           <span className="truncate text-[9px] font-medium tracking-[0.25em] text-muted-foreground">
-            روكــا
+            فيكسل
           </span>
         </span>
       )}

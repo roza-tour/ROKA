@@ -3,8 +3,9 @@ import type { Dictionary } from './ar';
 /** Dictionnaire français */
 export const fr: Dictionary = {
   app: {
-    name: 'ROKA',
+    name: 'FIXEL',
     tagline: 'Gestion de vente et réparation d’appareils électroniques',
+    slogan: 'Chaque appareil mérite une seconde vie',
     loading: 'Chargement…',
     saving: 'Enregistrement…',
     noData: 'Aucune donnée',

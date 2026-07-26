@@ -9,7 +9,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  * لأن التحقق من التوقيع وقاعدة البيانات لا يمكن تنفيذه على الحافة.
  */
 
-const SESSION_COOKIE = 'roka_session';
+const SESSION_COOKIE = 'fixel_session';
 
 /** مسارات عامة لا تتطلب تسجيل دخول */
 const PUBLIC_PATHS = ['/login', '/track'];
@@ -41,7 +41,9 @@ export const config = {
      * - ملفات Next الداخلية (_next)
      * - مسارات API (لها حراستها الخاصة وتُرجع 401 بدل إعادة التوجيه)
      * - الملفات الثابتة والصور المرفوعة
+     * - ملف manifest: المتصفح يجلبه أحياناً بلا كوكيز، وحجبه يمنع
+     *   «إضافة إلى الشاشة الرئيسية» على هاتف الفنّي
      */
-    '/((?!_next/static|_next/image|api|favicon.ico|icon.svg|uploads|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    '/((?!_next/static|_next/image|api|favicon.ico|icon.svg|uploads|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)',
   ],
 };

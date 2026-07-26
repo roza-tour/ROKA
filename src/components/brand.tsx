@@ -1,44 +1,53 @@
 import { cn } from '@/lib/utils';
 
 /**
- * علامة ROKA — «السداسي النابض».
+ * علامة FIXEL — «البكسل العائد».
  *
- * رأس البرغي السداسي = رمز الصيانة العالمي (نفتح ونُصلح).
- * خطّ النبض داخله = الجهاز يخرج حيّاً.
+ * أربع بكسلات في شبكة 2×2؛ ثلاث ممتلئة والرابعة تعود إلى مكانها.
+ * المعنى: نُرجع الناقص — وهو بالضبط ما يفعله محل الصيانة.
+ * الاسم نفسه مركّب من Fix + Pixel.
  *
  * قواعد الاستخدام:
  *  - العلامة تُرسم دائماً داخل مربّع مستدير — لا تُستعمل عارية على خلفية ملوّنة.
- *  - أصغر مقاس مسموح 16px؛ تحتها تفقد الوضوح.
+ *  - أصغر مقاس مسموح 16px؛ تحته تلتصق البكسلات ببعضها.
  *  - في الطباعة أحادية اللون استعمل variant="mono".
  *
- * نفس المسارات مكرّرة في public/icon.svg و src/lib/pdf/brand.ts — إن عدّلت
- * الشكل هنا فعدّلهما معاً.
+ * نفس الشكل مكرّر في public/icon.svg و src/lib/pdf/brand.ts — إن عدّلته
+ * هنا فعدّلهما معاً (راجع docs/BRAND.md).
  */
 
-/** إحداثيات المسارات — المصدر الوحيد للشكل في طبقة الواجهة */
-export const BRAND_PATHS = {
-  /** السداسي الخارجي */
-  hex: 'M32 11l17.3 10v20L32 51 14.7 41V21z',
-  /** خطّ النبض الداخلي */
-  pulse: 'M21.5 33h4.5l3.5-9 4.5 15.5 3-6.5h6',
+/** هندسة الشبكة في مربّع 64×64 — المصدر الوحيد للشكل في طبقة الواجهة */
+export const BRAND_GRID = {
+  /** مواضع البكسلات الثلاثة الممتلئة */
+  filled: [
+    { x: 14, y: 14 },
+    { x: 34, y: 14 },
+    { x: 14, y: 34 },
+  ],
+  size: 16,
+  radius: 4,
+  /** البكسل الرابع — مرسوم بحدّ فقط لأنه «في طريقه للعودة» */
+  restored: { x: 35.6, y: 35.6, size: 12.8, radius: 3, stroke: 3.2 },
 } as const;
 
 /** ألوان الهوية — مطابقة لمتغيّرات CSS في globals.css */
 export const BRAND_COLORS = {
-  teal: '#0D9488',
-  tealDark: '#0F766E',
-  tealLight: '#14B8A6',
-  ink: '#0F172A',
-  amber: '#F59E0B',
+  indigo: '#4F46E5',
+  indigoDark: '#4338CA',
+  indigoLight: '#6366F1',
+  /** لون البكسل العائد — أفتح من الخلفية ليُقرأ أنه «غير مكتمل بعد» */
+  restored: '#A5B4FC',
+  ink: '#0B1020',
+  cyan: '#22D3EE',
 } as const;
 
 export interface BrandMarkProps {
   /** الطول والعرض بالبكسل */
   size?: number;
   /**
-   * solid = مربّع تيل وعلامة بيضاء (الافتراضي)
+   * solid = مربّع بنفسجي وبكسلات بيضاء (الافتراضي)
    * mono  = بلا خلفية، يرث لون النص (للطباعة والأماكن الضيّقة)
-   * light = مربّع فاتح وعلامة تيل (على الخلفيات الداكنة الملوّنة)
+   * light = مربّع فاتح وبكسلات بنفسجية (على الخلفيات الداكنة الملوّنة)
    */
   variant?: 'solid' | 'mono' | 'light';
   className?: string;
@@ -49,8 +58,11 @@ export function BrandMark({ size = 32, variant = 'solid', className }: BrandMark
   const mono = variant === 'mono';
   const light = variant === 'light';
 
-  const background = mono ? 'none' : light ? 'currentColor' : BRAND_COLORS.teal;
-  const stroke = mono ? 'currentColor' : light ? BRAND_COLORS.teal : '#ffffff';
+  const background = light ? 'currentColor' : BRAND_COLORS.indigo;
+  const pixel = mono ? 'currentColor' : light ? BRAND_COLORS.indigo : '#ffffff';
+  // في الوضع الأحادي لا يوجد تباين لوني، فيبقى الفرق في الحدّ وحده
+  const outline = mono || light ? pixel : BRAND_COLORS.restored;
+  const { filled, size: px, radius, restored } = BRAND_GRID;
 
   return (
     <svg
@@ -62,20 +74,26 @@ export function BrandMark({ size = 32, variant = 'solid', className }: BrandMark
       className={cn('shrink-0', className)}
     >
       {!mono && <rect width="64" height="64" rx="15" fill={background} />}
-      <path
-        d={BRAND_PATHS.hex}
+      {filled.map((cell) => (
+        <rect
+          key={`${cell.x}-${cell.y}`}
+          x={cell.x}
+          y={cell.y}
+          width={px}
+          height={px}
+          rx={radius}
+          fill={pixel}
+        />
+      ))}
+      <rect
+        x={restored.x}
+        y={restored.y}
+        width={restored.size}
+        height={restored.size}
+        rx={restored.radius}
         fill="none"
-        stroke={stroke}
-        strokeWidth="3.2"
-        strokeLinejoin="round"
-      />
-      <path
-        d={BRAND_PATHS.pulse}
-        fill="none"
-        stroke={stroke}
-        strokeWidth="3.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        stroke={outline}
+        strokeWidth={restored.stroke}
       />
     </svg>
   );
@@ -84,19 +102,19 @@ export function BrandMark({ size = 32, variant = 'solid', className }: BrandMark
 export interface BrandLogoProps extends BrandMarkProps {
   /** إخفاء الاسم والاكتفاء بالعلامة — للشريط الجانبي المطوي */
   markOnly?: boolean;
-  /** اسم المحل — يحلّ محل «ROKA» عند تخصيصه من الإعدادات */
+  /** اسم المحل — يحلّ محل «FIXEL» عند تخصيصه من الإعدادات */
   name?: string;
   /** السطر الصغير تحت الاسم */
   tagline?: string;
 }
 
-/** الشعار الكامل: العلامة + الاسم اللاتيني + «روكــا» تحته */
+/** الشعار الكامل: العلامة + الاسم اللاتيني + «فيكسل» تحته */
 export function BrandLogo({
   size = 34,
   variant = 'solid',
   markOnly = false,
-  name = 'ROKA',
-  tagline = 'روكــا',
+  name = 'FIXEL',
+  tagline = 'فيكسل',
   className,
 }: BrandLogoProps) {
   return (

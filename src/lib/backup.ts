@@ -78,7 +78,7 @@ export async function createBackup(): Promise<BackupFile> {
   return {
     version: BACKUP_VERSION,
     createdAt: new Date().toISOString(),
-    appName: 'ROKA ERP',
+    appName: 'FIXEL ERP',
     counts,
     data,
   };

@@ -17,8 +17,8 @@ import {
 const db = new PrismaClient();
 
 const DEFAULT_SETTINGS: Record<string, string> = {
-  'shop.name': 'ROKA',
-  'shop.legalName': 'ROKA — بيع وصيانة الأجهزة الإلكترونية',
+  'shop.name': 'FIXEL',
+  'shop.legalName': 'FIXEL — بيع وصيانة الأجهزة الإلكترونية',
   'shop.phone': '',
   'shop.email': '',
   'shop.address': '',
@@ -75,7 +75,7 @@ async function main() {
   // ------------------------------------------------------------- المدير الأول
   const adminUsername = (process.env.SEED_ADMIN_USERNAME ?? 'admin').toLowerCase();
   const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? 'Admin@12345';
-  const adminEmail = (process.env.SEED_ADMIN_EMAIL ?? 'admin@roka.local').toLowerCase();
+  const adminEmail = (process.env.SEED_ADMIN_EMAIL ?? 'admin@fixel.local').toLowerCase();
 
   const existingAdmin = await db.user.findUnique({ where: { username: adminUsername } });
   if (!existingAdmin) {
@@ -241,7 +241,7 @@ function subjectFor(key: string, locale: string): string {
       en: 'Your invoice',
     },
   };
-  return subjects[key]?.[locale] ?? 'ROKA';
+  return subjects[key]?.[locale] ?? 'FIXEL';
 }
 
 main()

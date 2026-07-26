@@ -1,7 +1,7 @@
 {
-  "name": "ROKA — نظام إدارة بيع وصيانة الأجهزة الإلكترونية",
-  "short_name": "ROKA",
-  "description": "إدارة الصيانة والمخزون والفواتير والتقارير لمحلات بيع وصيانة الأجهزة الإلكترونية.",
+  "name": "FIXEL — نظام إدارة بيع وصيانة الأجهزة الإلكترونية",
+  "short_name": "FIXEL",
+  "description": "كل جهاز يستحق فرصة ثانية — إدارة الصيانة والمخزون والفواتير والتقارير لمحلات الأجهزة الإلكترونية.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "/dashboard",
@@ -9,7 +9,7 @@
   "display": "standalone",
   "orientation": "any",
   "background_color": "#f8fafc",
-  "theme_color": "#0D9488",
+  "theme_color": "#4F46E5",
   "icons": [
     { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

@@ -18,8 +18,8 @@ function applyTheme(theme: Theme) {
     (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.classList.toggle('dark', isDark);
   document.documentElement.dataset.theme = theme;
-  localStorage.setItem('roka_theme', theme);
-  document.cookie = `roka_theme=${theme}; path=/; max-age=31536000; samesite=lax`;
+  localStorage.setItem('fixel_theme', theme);
+  document.cookie = `fixel_theme=${theme}; path=/; max-age=31536000; samesite=lax`;
 }
 
 export function ThemeToggle({ compact = true }: { compact?: boolean }) {
@@ -28,13 +28,13 @@ export function ThemeToggle({ compact = true }: { compact?: boolean }) {
 
   useEffect(() => {
     setMounted(true);
-    const stored = (localStorage.getItem('roka_theme') as Theme) ?? 'system';
+    const stored = (localStorage.getItem('fixel_theme') as Theme) ?? 'system';
     setTheme(stored);
 
     // متابعة تغيّر تفضيل النظام أثناء وضع "system"
     const media = window.matchMedia('(prefers-color-scheme: dark)');
     const onChange = () => {
-      if ((localStorage.getItem('roka_theme') as Theme) === 'system') applyTheme('system');
+      if ((localStorage.getItem('fixel_theme') as Theme) === 'system') applyTheme('system');
     };
     media.addEventListener('change', onChange);
     return () => media.removeEventListener('change', onChange);

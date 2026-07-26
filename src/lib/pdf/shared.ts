@@ -42,7 +42,8 @@ export function drawShopHeader(
   drawBrandMark(builder, markX, top - 2, {
     size: markSize,
     color: '#ffffff',
-    background: COLORS.accent,
+    background: COLORS.brand,
+    outline: '#c7d2fe',
   });
 
   const nameX = rtl ? shopX : shopX + markSize + 8;

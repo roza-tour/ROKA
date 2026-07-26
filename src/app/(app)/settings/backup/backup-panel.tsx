@@ -39,7 +39,7 @@ export function BackupPanel({
       const blob = await response.blob();
       const disposition = response.headers.get('Content-Disposition') ?? '';
       const match = /filename="([^"]+)"/.exec(disposition);
-      const filename = match ? decodeURIComponent(match[1]) : 'roka-backup.json';
+      const filename = match ? decodeURIComponent(match[1]) : 'fixel-backup.json';
 
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');

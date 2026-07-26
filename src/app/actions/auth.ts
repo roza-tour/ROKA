@@ -164,7 +164,7 @@ export async function setLocaleAction(locale: string): Promise<void> {
 export async function setThemeAction(theme: string): Promise<void> {
   if (!['light', 'dark', 'system'].includes(theme)) return;
   const store = await cookies();
-  store.set('roka_theme', theme, {
+  store.set('fixel_theme', theme, {
     path: '/',
     maxAge: 60 * 60 * 24 * 365,
     sameSite: 'lax',

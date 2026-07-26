@@ -136,7 +136,7 @@ async function main() {
       await db.user.create({
         data: {
           username: spec.username,
-          email: `${spec.username}@roka.local`,
+          email: `${spec.username}@fixel.local`,
           passwordHash: await bcrypt.hash('Demo@12345', 10),
           fullName: spec.fullName,
           phone: `05${randomInt(50, 59)}${randomInt(100000, 999999)}`,

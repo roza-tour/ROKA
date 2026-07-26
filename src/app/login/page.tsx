@@ -46,14 +46,17 @@ export default async function LoginPage({
             <span className="flex flex-col leading-none">
               <span className="text-2xl font-bold tracking-wide">{shop.name}</span>
               <span className="mt-0.5 text-[10px] font-medium tracking-[0.3em] opacity-70">
-                روكــا
+                فيكسل
               </span>
             </span>
           </div>
         </div>
 
         <div className="relative space-y-6 text-primary-foreground">
-          <h2 className="max-w-md text-3xl font-bold leading-snug">{t.app.tagline}</h2>
+          <div className="max-w-md">
+            <h2 className="text-3xl font-bold leading-snug">{t.app.slogan}</h2>
+            <p className="mt-2 text-sm text-primary-foreground/70">{t.app.tagline}</p>
+          </div>
           <ul className="space-y-3 text-sm text-primary-foreground/85">
             <FeatureItem icon={Smartphone}>
               استقبال الأجهزة مع تقرير حالة كامل وتوقيع رقمي

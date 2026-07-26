@@ -9,7 +9,7 @@ import { randomToken } from './crypto';
 import type { Role } from './constants';
 import { can, canAny, type Permission } from './permissions';
 
-export const SESSION_COOKIE = 'roka_session';
+export const SESSION_COOKIE = 'fixel_session';
 
 const encoder = new TextEncoder();
 

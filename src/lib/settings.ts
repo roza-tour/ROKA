@@ -84,7 +84,7 @@ export interface ShopInfo {
 export const getShopInfo = cache(async (): Promise<ShopInfo> => {
   const s = await getSettings();
   return {
-    name: s['shop.name'] || 'ROKA',
+    name: s['shop.name'] || 'FIXEL',
     legalName: s['shop.legalName'] || '',
     phone: s['shop.phone'] || '',
     phone2: s['shop.phone2'] || '',

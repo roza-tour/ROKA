@@ -6,7 +6,7 @@ export function ThemeScript({ defaultTheme = 'system' }: { defaultTheme?: string
   const code = `
 (function(){
   try {
-    var stored = localStorage.getItem('roka_theme') || ${JSON.stringify(defaultTheme)};
+    var stored = localStorage.getItem('fixel_theme') || ${JSON.stringify(defaultTheme)};
     var isDark = stored === 'dark' ||
       (stored === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     document.documentElement.classList.toggle('dark', isDark);

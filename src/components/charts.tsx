@@ -31,9 +31,9 @@ import type { Locale } from '@/i18n/config';
  * والأخضر متباعدان حتى لا يلتبسا في رسم متعدد السلاسل.
  */
 export const CHART_COLORS = [
-  '#0d9488',
+  '#4f46e5',
   '#f59e0b',
-  '#8b5cf6',
+  '#22d3ee',
   '#ef4444',
   '#3b82f6',
   '#10b981',

@@ -7,12 +7,12 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'ROKA — نظام إدارة بيع وصيانة الأجهزة الإلكترونية',
-    template: '%s · ROKA',
+    default: 'FIXEL — نظام إدارة بيع وصيانة الأجهزة الإلكترونية',
+    template: '%s · FIXEL',
   },
   description:
     'نظام احترافي متكامل لإدارة محلات بيع وصيانة الهواتف والحواسيب والأجهزة اللوحية: صيانة، مخزون، فواتير، تقارير وإشعارات.',
-  applicationName: 'ROKA',
+  applicationName: 'FIXEL',
   robots: { index: false, follow: false },
   icons: {
     icon: [
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     apple: [{ url: '/icon-180.png', sizes: '180x180', type: 'image/png' }],
   },
   manifest: '/manifest.webmanifest',
-  appleWebApp: { capable: true, title: 'ROKA', statusBarStyle: 'black-translucent' },
+  appleWebApp: { capable: true, title: 'FIXEL', statusBarStyle: 'black-translucent' },
 };
 
 export const viewport: Viewport = {
@@ -30,8 +30,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#0D9488' },
-    { media: '(prefers-color-scheme: dark)', color: '#0F172A' },
+    { media: '(prefers-color-scheme: light)', color: '#4F46E5' },
+    { media: '(prefers-color-scheme: dark)', color: '#0B1020' },
   ],
 };
 
@@ -40,7 +40,7 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const locale = await getLocale();
   const dir = LOCALE_META[locale].dir;
-  const theme = (await cookies()).get('roka_theme')?.value ?? 'system';
+  const theme = (await cookies()).get('fixel_theme')?.value ?? 'system';
 
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>

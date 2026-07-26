@@ -268,8 +268,8 @@ export const CURRENCIES = [
 ];
 
 export const DEFAULT_SETTINGS: Record<string, string> = {
-  'shop.name': 'ROKA',
-  'shop.legalName': 'ROKA — بيع وصيانة الأجهزة الإلكترونية',
+  'shop.name': 'FIXEL',
+  'shop.legalName': 'FIXEL — بيع وصيانة الأجهزة الإلكترونية',
   'shop.phone': '',
   'shop.phone2': '',
   'shop.email': '',

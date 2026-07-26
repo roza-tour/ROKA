@@ -56,7 +56,7 @@ export async function toExcel<T>(
 ): Promise<Buffer> {
   const ExcelJS = (await import('exceljs')).default;
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'ROKA ERP';
+  workbook.creator = 'FIXEL ERP';
   workbook.created = new Date();
 
   const sheet = workbook.addWorksheet(options.sheetName ?? 'Data', {

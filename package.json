@@ -1,8 +1,8 @@
 {
-  "name": "roka-erp",
+  "name": "fixel-erp",
   "version": "1.0.0",
   "private": true,
-  "description": "ROKA ERP — نظام متكامل لإدارة محلات بيع وصيانة الأجهزة الإلكترونية",
+  "description": "FIXEL — نظام متكامل لإدارة محلات بيع وصيانة الأجهزة الإلكترونية",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",

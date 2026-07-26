@@ -1,4 +1,4 @@
-# نشر ROKA ERP على استضافة cPanel
+# نشر FIXEL ERP على استضافة cPanel
 
 هذا الدليل يشرح تشغيل النظام على استضافة cPanel باستخدام **MySQL / MariaDB**
 (قاعدة البيانات المتوفرة في كل حسابات cPanel تقريباً) و **Setup Node.js App**
@@ -23,18 +23,18 @@
 
 من cPanel → **MySQL® Databases**:
 
-1. **Create New Database**: اكتب `roka` — سينشئه cPanel باسم `اسمحسابك_roka`.
-2. **Add New User**: اكتب `roka` وكلمة مرور قوية — سيصبح `اسمحسابك_roka`.
+1. **Create New Database**: اكتب `fixel` — سينشئه cPanel باسم `اسمحسابك_fixel`.
+2. **Add New User**: اكتب `fixel` وكلمة مرور قوية — سيصبح `اسمحسابك_fixel`.
 3. **Add User To Database** → اختر المستخدم والقاعدة → **ALL PRIVILEGES**.
 
-> ⚠️ سجّل الاسمين **كاملين مع البادئة**. مثال: `rozatour_roka`.
+> ⚠️ سجّل الاسمين **كاملين مع البادئة**. مثال: `rozatour_fixel`.
 
 ### ضبط الترميز (مهم للعربية)
 
 من **phpMyAdmin** → اختر القاعدة → تبويب **SQL** ونفّذ:
 
 ```sql
-ALTER DATABASE `اسمحسابك_roka`
+ALTER DATABASE `اسمحسابك_fixel`
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 ```
@@ -85,7 +85,7 @@ Prisma يحوّل أي حقل `String` في MySQL إلى `VARCHAR(191)` افتر
 عدّل `.env` محلياً (وستكرّر نفس القيم في cPanel لاحقاً):
 
 ```env
-DATABASE_URL="mysql://اسمحسابك_roka:كلمةالمرور@localhost:3306/اسمحسابك_roka?connection_limit=5&pool_timeout=20"
+DATABASE_URL="mysql://اسمحسابك_fixel:كلمةالمرور@localhost:3306/اسمحسابك_fixel?connection_limit=5&pool_timeout=20"
 
 AUTH_SECRET="ناتج openssl rand -base64 48"
 ENCRYPTION_KEY="ناتج openssl rand -hex 32"
@@ -129,14 +129,14 @@ npm run build:cpanel
 > إن كانت Debian/Ubuntu ← `debian-openssl-3.0.x`.
 > ثم أعد `npm run build:cpanel`.
 
-اضغط **محتويات** `.next/standalone` (وليس المجلد نفسه) في `roka.zip`.
+اضغط **محتويات** `.next/standalone` (وليس المجلد نفسه) في `fixel.zip`.
 
 ### المسار (ب) — بناء على الخادم عبر SSH (أدق وأبسط)
 
 ارفع كود المشروع كاملاً ثم:
 
 ```bash
-cd ~/roka
+cd ~/fixel
 npm ci
 npm run build
 ```
@@ -155,13 +155,13 @@ npm run build
 |---|---|
 | Node.js version | 20 أو أحدث |
 | Application mode | **Production** |
-| Application root | `roka` |
-| Application URL | الدومين أو `yourdomain.com/roka` |
+| Application root | `fixel` |
+| Application URL | الدومين أو `yourdomain.com/fixel` |
 | Application startup file | `server.js` |
 
 اضغط **CREATE**، ثم:
 
-1. ارفع `roka.zip` عبر **File Manager** إلى مجلد `roka` وفكّ الضغط.
+1. ارفع `fixel.zip` عبر **File Manager** إلى مجلد `fixel` وفكّ الضغط.
 2. ارجع إلى Setup Node.js App وأضف كل متغيّرات البيئة في قسم
    **Environment variables** (نفس قيم الخطوة 3).
 3. اضغط **Run NPM Install** — عند استخدام حزمة standalone لن يثبّت شيئاً
@@ -175,8 +175,8 @@ npm run build
 الظاهر، ثم من **Terminal** في cPanel:
 
 ```bash
-source /home/اسمحسابك/nodevenv/roka/20/bin/activate
-cd ~/roka
+source /home/اسمحسابك/nodevenv/fixel/20/bin/activate
+cd ~/fixel
 
 # إنشاء كل الجداول
 npx prisma migrate deploy      # أو: npx prisma db push   إن لم تكن هناك هجرات
@@ -237,9 +237,9 @@ npx prisma migrate deploy   # يطبّق أي تغييرات جديدة في ا�
 وأعد تشغيل التطبيق.
 
 > **نصيحة**: انقل `public/uploads` إلى خارج مجلد التطبيق (مثلاً
-> `~/roka-data/uploads`) واربطه برابط رمزي:
+> `~/fixel-data/uploads`) واربطه برابط رمزي:
 > ```bash
-> ln -s ~/roka-data/uploads ~/roka/public/uploads
+> ln -s ~/fixel-data/uploads ~/fixel/public/uploads
 > ```
 > بهذا لن يمسّه أي نشر مستقبلي.
 

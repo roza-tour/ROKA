@@ -18,13 +18,13 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* هوية ROKA — تيل عميق (#0D9488) */
-    --primary: 175 84% 32%;
+    /* هوية FIXEL — بنفسجي إنديغو (#4F46E5) */
+    --primary: 243 75% 59%;
     --primary-foreground: 0 0% 100%;
-    --primary-50: 166 76% 97%;
-    --primary-100: 167 85% 89%;
-    --primary-600: 175 77% 28%;
-    --primary-700: 175 79% 22%;
+    --primary-50: 226 100% 97%;
+    --primary-100: 226 100% 94%;
+    --primary-600: 245 58% 51%;
+    --primary-700: 244 55% 41%;
 
     --secondary: 210 40% 96%;
     --secondary-foreground: 222 47% 11%;
@@ -44,24 +44,24 @@
 
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 175 84% 32%;
+    --ring: 243 75% 59%;
   }
 
   .dark {
-    --background: 222 47% 8%;
+    --background: 228 45% 7%;
     --foreground: 210 40% 96%;
     --card: 222 44% 11%;
     --card-foreground: 210 40% 96%;
     --popover: 222 44% 11%;
     --popover-foreground: 210 40% 96%;
 
-    /* في الوضع الداكن نرفع الإضاءة (#14B8A6) ليبقى التباين كافياً */
-    --primary: 173 80% 40%;
-    --primary-foreground: 180 90% 6%;
-    --primary-50: 180 30% 14%;
-    --primary-100: 178 32% 19%;
-    --primary-600: 173 80% 35%;
-    --primary-700: 175 78% 29%;
+    /* في الوضع الداكن نرفع الإضاءة (#6366F1) ليبقى التباين كافياً */
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+    --primary-50: 235 32% 16%;
+    --primary-100: 236 33% 21%;
+    --primary-600: 243 75% 59%;
+    --primary-700: 245 58% 51%;
 
     --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 96%;
@@ -81,7 +81,7 @@
 
     --border: 217 33% 20%;
     --input: 217 33% 22%;
-    --ring: 173 80% 40%;
+    --ring: 239 84% 67%;
   }
 
   * {

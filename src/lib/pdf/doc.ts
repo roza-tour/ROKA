@@ -66,6 +66,8 @@ export const COLORS = {
   hairline: '#e5e7eb',
   fill: '#f3f4f6',
   accent: '#0f172a',
+  /** لون الهوية — للعلامة في الترويسة فقط، لا للنصوص (يبقى الحبر أسود للطباعة) */
+  brand: '#4f46e5',
   danger: '#b91c1c',
   success: '#047857',
 } as const;
@@ -114,9 +116,9 @@ export class PdfBuilder {
       bufferPages: true,
       autoFirstPage: true,
       info: {
-        Title: options.title ?? 'ROKA',
-        Author: options.author ?? 'ROKA ERP',
-        Creator: 'ROKA ERP',
+        Title: options.title ?? 'FIXEL',
+        Author: options.author ?? 'FIXEL ERP',
+        Creator: 'FIXEL ERP',
       },
     });
 

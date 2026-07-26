@@ -3,8 +3,9 @@ import type { Dictionary } from './ar';
 /** English dictionary */
 export const en: Dictionary = {
   app: {
-    name: 'ROKA',
+    name: 'FIXEL',
     tagline: 'Electronics sales & repair shop management',
+    slogan: 'Every device deserves a second life',
     loading: 'Loading…',
     saving: 'Saving…',
     noData: 'No data',

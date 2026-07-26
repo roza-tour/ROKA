@@ -24,7 +24,7 @@ export async function GET() {
     const [backup, shop] = await Promise.all([createBackup(), getShopInfo()]);
     const json = JSON.stringify(backup);
     const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    const filename = `roka-backup-${stamp}.json`;
+    const filename = `fixel-backup-${stamp}.json`;
 
     await db.backupLog.create({
       data: {

@@ -3,7 +3,7 @@ export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = 'ar';
 
-export const LOCALE_COOKIE = 'roka_locale';
+export const LOCALE_COOKIE = 'fixel_locale';
 
 export const LOCALE_META: Record<
   Locale,
