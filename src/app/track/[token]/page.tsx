@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import {
-  Wrench,
   CheckCircle2,
   Circle,
   Phone,
@@ -10,6 +9,7 @@ import {
   Smartphone,
   Clock,
 } from 'lucide-react';
+import { BrandMark } from '@/components/brand';
 
 import { getI18n } from '@/i18n';
 import { getShopInfo, getFinanceSettings } from '@/lib/settings';
@@ -98,10 +98,8 @@ export default async function TrackPage({
       <div className="mx-auto max-w-2xl px-4 py-8">
         {/* الترويسة */}
         <header className="mb-6 text-center">
-          <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-            <Wrench className="h-7 w-7" />
-          </div>
-          <h1 className="text-2xl font-bold">{shop.name}</h1>
+          <BrandMark size={56} className="mx-auto mb-3" />
+          <h1 className="text-2xl font-bold tracking-wide">{shop.name}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t.track.subtitle}</p>
         </header>
 

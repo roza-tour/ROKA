@@ -15,8 +15,14 @@ export const metadata: Metadata = {
   applicationName: 'ROKA',
   robots: { index: false, follow: false },
   icons: {
-    icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [{ url: '/icon-180.png', sizes: '180x180', type: 'image/png' }],
   },
+  manifest: '/manifest.webmanifest',
+  appleWebApp: { capable: true, title: 'ROKA', statusBarStyle: 'black-translucent' },
 };
 
 export const viewport: Viewport = {
@@ -24,8 +30,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f8fafc' },
-    { media: '(prefers-color-scheme: dark)', color: '#0b1220' },
+    { media: '(prefers-color-scheme: light)', color: '#0D9488' },
+    { media: '(prefers-color-scheme: dark)', color: '#0F172A' },
   ],
 };
 

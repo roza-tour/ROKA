@@ -18,12 +18,13 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 221 83% 53%;
+    /* هوية ROKA — تيل عميق (#0D9488) */
+    --primary: 175 84% 32%;
     --primary-foreground: 0 0% 100%;
-    --primary-50: 214 100% 97%;
-    --primary-100: 214 95% 93%;
-    --primary-600: 221 83% 48%;
-    --primary-700: 224 76% 40%;
+    --primary-50: 166 76% 97%;
+    --primary-100: 167 85% 89%;
+    --primary-600: 175 77% 28%;
+    --primary-700: 175 79% 22%;
 
     --secondary: 210 40% 96%;
     --secondary-foreground: 222 47% 11%;
@@ -43,7 +44,7 @@
 
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 221 83% 53%;
+    --ring: 175 84% 32%;
   }
 
   .dark {
@@ -54,12 +55,13 @@
     --popover: 222 44% 11%;
     --popover-foreground: 210 40% 96%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 8%;
-    --primary-50: 222 47% 14%;
-    --primary-100: 222 45% 18%;
-    --primary-600: 217 91% 55%;
-    --primary-700: 217 85% 48%;
+    /* في الوضع الداكن نرفع الإضاءة (#14B8A6) ليبقى التباين كافياً */
+    --primary: 173 80% 40%;
+    --primary-foreground: 180 90% 6%;
+    --primary-50: 180 30% 14%;
+    --primary-100: 178 32% 19%;
+    --primary-600: 173 80% 35%;
+    --primary-700: 175 78% 29%;
 
     --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 96%;
@@ -79,7 +81,7 @@
 
     --border: 217 33% 20%;
     --input: 217 33% 22%;
-    --ring: 217 91% 60%;
+    --ring: 173 80% 40%;
   }
 
   * {

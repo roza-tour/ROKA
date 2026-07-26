@@ -6,7 +6,8 @@ import { getShopInfo } from '@/lib/settings';
 import { LoginForm } from './login-form';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { Wrench, Smartphone, Laptop, ShieldCheck } from 'lucide-react';
+import { Smartphone, Laptop, ShieldCheck } from 'lucide-react';
+import { BrandMark } from '@/components/brand';
 
 export const metadata: Metadata = { title: 'تسجيل الدخول' };
 
@@ -39,10 +40,15 @@ export default async function LoginPage({
 
         <div className="relative">
           <div className="flex items-center gap-3 text-primary-foreground">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
-              <Wrench className="h-6 w-6" />
+            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
+              <BrandMark size={30} variant="mono" />
             </span>
-            <span className="text-2xl font-bold tracking-tight">{shop.name}</span>
+            <span className="flex flex-col leading-none">
+              <span className="text-2xl font-bold tracking-wide">{shop.name}</span>
+              <span className="mt-0.5 text-[10px] font-medium tracking-[0.3em] opacity-70">
+                روكــا
+              </span>
+            </span>
           </div>
         </div>
 
@@ -75,10 +81,8 @@ export default async function LoginPage({
 
         <div className="w-full max-w-sm">
           <div className="mb-8 flex flex-col items-center gap-3 lg:hidden">
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-              <Wrench className="h-7 w-7" />
-            </span>
-            <span className="text-2xl font-bold">{shop.name}</span>
+            <BrandMark size={56} />
+            <span className="text-2xl font-bold tracking-wide">{shop.name}</span>
           </div>
 
           <div className="mb-6">

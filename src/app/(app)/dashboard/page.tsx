@@ -252,7 +252,7 @@ export default async function DashboardPage() {
             locale={locale}
             currency={finance.currency}
             series={[
-              { key: 'revenue', label: t.dashboard.revenue, color: '#3b82f6' },
+              { key: 'revenue', label: t.dashboard.revenue, color: '#0d9488' },
               { key: 'profit', label: t.dashboard.profit, color: '#10b981' },
               { key: 'expenses', label: t.dashboard.expenses, color: '#f59e0b' },
             ]}

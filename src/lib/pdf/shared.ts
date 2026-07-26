@@ -2,6 +2,7 @@ import 'server-only';
 
 import { PdfBuilder, COLORS } from './doc';
 import { drawText } from './text';
+import { drawBrandMark } from './brand';
 import type { ShopInfo } from '../settings';
 
 export { appUrl } from './kinds';
@@ -35,10 +36,22 @@ export function drawShopHeader(
   const docX = rtl ? margin : margin + leftBlockWidth + 12;
 
   // ------------------------------------------------------------ بيانات المحل
+  // العلامة ثم الاسم على نفس السطر، والعلامة في جهة بداية القراءة
+  const markSize = 26;
+  const markX = rtl ? shopX + leftBlockWidth - markSize : shopX;
+  drawBrandMark(builder, markX, top - 2, {
+    size: markSize,
+    color: '#ffffff',
+    background: COLORS.accent,
+  });
+
+  const nameX = rtl ? shopX : shopX + markSize + 8;
+  const nameWidth = leftBlockWidth - markSize - 8;
+
   builder.font('bold', 16, COLORS.ink);
   let shopY = top;
-  builder.text(shop.name, shopX, shopY, leftBlockWidth, { align: 'start', ellipsis: true });
-  shopY += 20;
+  builder.text(shop.name, nameX, shopY + 3, nameWidth, { align: 'start', ellipsis: true });
+  shopY += 22;
 
   if (shop.legalName) {
     builder.font('body', 7.5, COLORS.muted);

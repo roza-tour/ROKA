@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Wrench, LogOut, UserCircle, KeyRound, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Menu, X, LogOut, UserCircle, KeyRound, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { cn, initials } from '@/lib/utils';
 import { SidebarNav, type SidebarBadges } from './sidebar';
 import type { NavSection } from './nav-config';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { GlobalSearch } from '@/components/global-search';
+import { BrandMark } from '@/components/brand';
 import { logoutAction } from '@/app/actions/auth';
 import type { Locale } from '@/i18n/config';
 
@@ -215,11 +216,14 @@ function BrandHeader({
 }) {
   const content = (
     <Link href="/dashboard" className="flex items-center gap-2.5 overflow-hidden">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-        <Wrench className="h-5 w-5" />
-      </span>
+      <BrandMark size={36} />
       {!collapsed && (
-        <span className="truncate text-lg font-bold tracking-tight">{shopName}</span>
+        <span className="flex min-w-0 flex-col leading-none">
+          <span className="truncate text-lg font-bold tracking-wide">{shopName}</span>
+          <span className="truncate text-[9px] font-medium tracking-[0.25em] text-muted-foreground">
+            روكــا
+          </span>
+        </span>
       )}
     </Link>
   );
