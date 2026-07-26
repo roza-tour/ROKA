@@ -42,6 +42,11 @@ export interface QueueOptions {
   locale?: string;
   /** الإرسال فوراً بدل الانتظار في القائمة */
   sendNow?: boolean;
+  /**
+   * أرفق نسخة PDF من المستند المشار إليه في refType/refId.
+   * البريد يستقبلها كمرفق فعلي، وواتساب كرابط موقّع قصير العمر.
+   */
+  attachPdf?: boolean;
 }
 
 /** استبدال المتغيّرات {{name}} في نص القالب */
@@ -92,6 +97,7 @@ export async function queueNotification(options: QueueOptions): Promise<string |
         templateKey: options.key,
         refType: options.refType ?? null,
         refId: options.refId ?? null,
+        attachPdf: options.attachPdf === true,
         status: 'PENDING',
       },
     });
@@ -116,11 +122,14 @@ export async function deliverNotification(logId: string): Promise<boolean> {
   if (!log || log.status === 'SENT') return false;
 
   try {
+    const attachment = log.attachPdf ? await resolveAttachment(log.refType, log.refId) : null;
+
     const provider = await sendViaProvider(
       log.channel as NotificationChannel,
       log.toAddress,
       log.body,
       log.subject,
+      attachment,
     );
 
     await db.notificationLog.update({
@@ -169,6 +178,46 @@ export async function processNotificationQueue(limit = 50): Promise<{
   return { sent, failed };
 }
 
+// ------------------------------------------------------------------ المرفقات
+
+export interface PdfAttachment {
+  /** محتوى الملف — يستخدمه البريد كمرفق فعلي */
+  buffer: Buffer;
+  /** رابط عام موقّع قصير العمر — يستخدمه واتساب والرسائل القصيرة */
+  url: string;
+  /** اسم الملف بدون امتداد (رقم المستند) */
+  filename: string;
+}
+
+/**
+ * يولّد مرفق PDF من المستند المشار إليه في سجل الإشعار.
+ * يُرجع null بهدوء عند الفشل — الإشعار يجب أن يصل حتى لو تعذّر توليد الملف.
+ */
+async function resolveAttachment(
+  refType: string | null,
+  refId: string | null,
+): Promise<PdfAttachment | null> {
+  if (!refType || !refId) return null;
+  try {
+    // استيراد كسول: مكتبة PDF ثقيلة ولا داعي لتحميلها مع كل إشعار
+    const { generatePdf, kindForEntity, signedPdfUrl } = await import('./pdf');
+    const kind = kindForEntity(refType);
+    if (!kind) return null;
+
+    const result = await generatePdf(kind, refId);
+    if (!result) return null;
+
+    return {
+      buffer: result.buffer,
+      url: signedPdfUrl(kind, refId, { download: true }),
+      filename: result.filename,
+    };
+  } catch (error) {
+    console.error('[notifications] تعذّر توليد مرفق PDF:', error);
+    return null;
+  }
+}
+
 // ------------------------------------------------------------------ المزوّدون
 
 async function sendViaProvider(
@@ -176,14 +225,16 @@ async function sendViaProvider(
   to: string,
   body: string,
   subject: string | null,
+  attachment: PdfAttachment | null,
 ): Promise<string> {
   switch (channel) {
     case 'SMS':
-      return sendSms(to, body);
+      // الرسائل القصيرة لا تحمل مرفقات — نضيف الرابط إلى نص الرسالة
+      return sendSms(to, attachment ? `${body}\n${attachment.url}` : body);
     case 'WHATSAPP':
-      return sendWhatsApp(to, body);
+      return sendWhatsApp(to, body, attachment);
     case 'EMAIL':
-      return sendEmail(to, subject ?? 'ROKA', body);
+      return sendEmail(to, subject ?? 'ROKA', body, attachment);
     case 'INTERNAL':
       return 'internal';
     default:
@@ -242,11 +293,17 @@ async function sendSms(to: string, body: string): Promise<string> {
   throw new Error(`مزوّد SMS غير معروف: ${provider}`);
 }
 
-async function sendWhatsApp(to: string, body: string): Promise<string> {
+async function sendWhatsApp(
+  to: string,
+  body: string,
+  attachment: PdfAttachment | null,
+): Promise<string> {
   const provider = process.env.WHATSAPP_PROVIDER ?? 'log';
 
   if (provider === 'log') {
-    console.log(`\n💬 [WhatsApp → ${to}]\n${body}\n`);
+    console.log(
+      `\n💬 [WhatsApp → ${to}]\n${body}${attachment ? `\n📎 ${attachment.filename} → ${attachment.url}` : ''}\n`,
+    );
     return 'log';
   }
 
@@ -259,12 +316,27 @@ async function sendWhatsApp(to: string, body: string): Promise<string> {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        messaging_product: 'whatsapp',
-        to: to.replace(/\D/g, ''),
-        type: 'text',
-        text: { body },
-      }),
+      // واتساب لا يقبل رفع ملف مباشرةً في هذا النداء — يجلبه من رابط عام.
+      // لذلك نرسل رابطاً موقّعاً قصير العمر بدل فتح المستند للجميع.
+      body: JSON.stringify(
+        attachment
+          ? {
+              messaging_product: 'whatsapp',
+              to: to.replace(/\D/g, ''),
+              type: 'document',
+              document: {
+                link: attachment.url,
+                filename: `${attachment.filename}.pdf`,
+                caption: body.slice(0, 1024),
+              },
+            }
+          : {
+              messaging_product: 'whatsapp',
+              to: to.replace(/\D/g, ''),
+              type: 'text',
+              text: { body },
+            },
+      ),
     });
     if (!response.ok) throw new Error(`WhatsApp: ${await response.text()}`);
     return 'meta';
@@ -280,7 +352,11 @@ async function sendWhatsApp(to: string, body: string): Promise<string> {
           ? { Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}` }
           : {}),
       },
-      body: JSON.stringify({ to, message: body }),
+      body: JSON.stringify({
+        to,
+        message: body,
+        ...(attachment ? { documentUrl: attachment.url, filename: `${attachment.filename}.pdf` } : {}),
+      }),
     });
     if (!response.ok) throw new Error(`WhatsApp HTTP: ${await response.text()}`);
     return 'http';
@@ -289,11 +365,18 @@ async function sendWhatsApp(to: string, body: string): Promise<string> {
   throw new Error(`مزوّد WhatsApp غير معروف: ${provider}`);
 }
 
-async function sendEmail(to: string, subject: string, body: string): Promise<string> {
+async function sendEmail(
+  to: string,
+  subject: string,
+  body: string,
+  attachment: PdfAttachment | null,
+): Promise<string> {
   const provider = process.env.EMAIL_PROVIDER ?? 'log';
 
   if (provider === 'log') {
-    console.log(`\n📧 [Email → ${to}] ${subject}\n${body}\n`);
+    console.log(
+      `\n📧 [Email → ${to}] ${subject}\n${body}${attachment ? `\n📎 مرفق: ${attachment.filename}.pdf (${attachment.buffer.length} بايت)` : ''}\n`,
+    );
     return 'log';
   }
 
@@ -320,6 +403,17 @@ async function sendEmail(to: string, subject: string, body: string): Promise<str
       to,
       subject,
       text: body,
+      ...(attachment
+        ? {
+            attachments: [
+              {
+                filename: `${attachment.filename}.pdf`,
+                content: attachment.buffer,
+                contentType: 'application/pdf',
+              },
+            ],
+          }
+        : {}),
     });
     return 'smtp';
   }
@@ -340,6 +434,7 @@ interface NodemailerLike {
       to: string;
       subject: string;
       text: string;
+      attachments?: { filename: string; content: Buffer; contentType: string }[];
     }): Promise<unknown>;
   };
 }

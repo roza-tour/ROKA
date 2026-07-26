@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
   Printer,
+  FileDown,
   Receipt,
   Phone,
   User,
@@ -161,6 +162,11 @@ export default async function RepairDetailPage({
         breadcrumbs={[{ label: t.repair.title, href: '/repairs' }, { label: order.number }]}
         actions={
           <>
+            <Link href={`/api/pdf/repair/${order.id}?dl=1`} target="_blank">
+              <Button variant="outline" icon={<FileDown className="h-4 w-4" />}>
+                {t.pdf.download}
+              </Button>
+            </Link>
             <Link href={`/repairs/${order.id}/receipt`} target="_blank">
               <Button variant="outline" icon={<Printer className="h-4 w-4" />}>
                 {t.repair.printReceipt}

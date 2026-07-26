@@ -569,6 +569,9 @@ export async function notifyRepairStatus(
     customerId: order.customerId,
     refType: 'RepairOrder',
     refId: order.id,
+    // إيصال الاستلام يُرفق مرّة واحدة عند الاستلام فقط — إرفاقه مع كل
+    // تغيير حالة إزعاج للعميل وحِمل زائد على الخادم.
+    attachPdf: key === 'repair.received',
     vars: {
       customerName: order.customer.firstName,
       deviceName: `${order.device.brand} ${order.device.model}`,

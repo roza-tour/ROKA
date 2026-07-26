@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
   Printer,
+  FileDown,
   User,
   Wrench,
   Wallet,
@@ -91,6 +92,11 @@ export default async function InvoiceDetailPage({
         breadcrumbs={[{ label: t.invoice.title, href: '/invoices' }, { label: invoice.number }]}
         actions={
           <>
+            <Link href={`/api/pdf/invoice/${invoice.id}?dl=1`} target="_blank">
+              <Button variant="outline" icon={<FileDown className="h-4 w-4" />}>
+                {t.pdf.download}
+              </Button>
+            </Link>
             <Link href={`/invoices/${invoice.id}/print`} target="_blank">
               <Button variant="outline" icon={<Printer className="h-4 w-4" />}>
                 {t.invoice.print}

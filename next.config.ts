@@ -7,7 +7,12 @@ const nextConfig: NextConfig = {
   // مثالية لاستضافة cPanel حيث لا يمكن تنفيذ npm install كامل على الخادم.
   // تُفعَّل عبر: npm run build:cpanel
   ...(process.env.BUILD_STANDALONE === '1' ? { output: 'standalone' as const } : {}),
-  serverExternalPackages: ['bwip-js', 'exceljs', 'bcryptjs'],
+  serverExternalPackages: ['bwip-js', 'exceljs', 'bcryptjs', 'pdfkit'],
+  // خطوط توليد PDF تُقرأ من القرص وقت التشغيل، فيجب أن يتتبّعها Next
+  // ويضمّها في حزمة standalone وإلا فشل توليد الفواتير على الخادم.
+  outputFileTracingIncludes: {
+    '/api/pdf/[kind]/[id]': ['./assets/fonts/**'],
+  },
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts', 'date-fns'],
     // يتيح forbidden()/unauthorized() لإرجاع 403/401 بدل 500 عند رفض الصلاحية

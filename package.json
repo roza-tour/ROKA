@@ -28,6 +28,7 @@
   "dependencies": {
     "@prisma/client": "6.19.3",
     "bcryptjs": "2.4.3",
+    "bidi-js": "^1.0.3",
     "bwip-js": "4.5.1",
     "clsx": "2.1.1",
     "date-fns": "4.1.0",
@@ -35,6 +36,7 @@
     "jose": "5.9.6",
     "lucide-react": "0.462.0",
     "next": "15.5.22",
+    "pdfkit": "^0.19.1",
     "qrcode": "1.5.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -45,6 +47,7 @@
   "devDependencies": {
     "@types/bcryptjs": "2.4.6",
     "@types/node": "22.10.2",
+    "@types/pdfkit": "^0.17.6",
     "@types/qrcode": "1.5.5",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",

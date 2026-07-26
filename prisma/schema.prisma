@@ -1006,6 +1006,11 @@ model NotificationLog {
   refType     String?
   refId       String?
 
+  /**
+   * أرفق نسخة PDF من المستند المشار إليه عند الإرسال (بريد: مرفق، واتساب: رابط موقّع)
+   */
+  attachPdf Boolean @default(false)
+
   status   String    @default("PENDING") // PENDING | SENT | FAILED | SKIPPED
   provider String?
   error    String?

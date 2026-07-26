@@ -548,6 +548,9 @@ export async function sendInvoiceNotificationAction(
       customerId: invoice.customerId,
       refType: 'Invoice',
       refId: invoice.id,
+      // العميل يستلم نسخة الفاتورة نفسها: مرفقاً في البريد، ورابطاً
+      // موقّعاً في واتساب والرسائل القصيرة.
+      attachPdf: true,
       vars: {
         customerName: invoice.customer.firstName,
         invoiceNumber: invoice.number,

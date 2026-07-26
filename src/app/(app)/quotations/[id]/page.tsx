@@ -2,7 +2,7 @@ import { pagePermission } from '@/lib/guards';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { User, Smartphone, Printer } from 'lucide-react';
+import { User, Smartphone, Printer, FileDown } from 'lucide-react';
 
 import { getCurrentUser } from '@/lib/auth';
 import { can } from '@/lib/permissions';
@@ -62,6 +62,11 @@ export default async function QuotationDetailPage({
         ]}
         actions={
           <>
+            <Link href={`/api/pdf/quotation/${quotation.id}?dl=1`} target="_blank">
+              <Button variant="outline" icon={<FileDown className="h-4 w-4" />}>
+                {t.pdf.download}
+              </Button>
+            </Link>
             <Link href={`/quotations/${quotation.id}/print`} target="_blank">
               <Button variant="outline" icon={<Printer className="h-4 w-4" />}>
                 {t.app.print}
